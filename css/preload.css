@@ -1,0 +1,10 @@
+html {
+  background: linear-gradient(180deg, #ff4d91, #0a0a0a);
+  color: #fff;
+  visibility: hidden;
+  opacity: 0;
+}
+body {
+  background: none;
+  margin: 0;
+}

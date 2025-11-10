@@ -1,0 +1,3 @@
+echo ".env.local" > .gitignore
+echo "node_modules/" >> .gitignore
+echo "dist/" >> .gitignore

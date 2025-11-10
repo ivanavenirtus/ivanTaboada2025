@@ -1,0 +1,75 @@
+body {
+    font-family: 'Courier New', monospace;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat-container {
+    font-family: 'Courier New', monospace;
+    width: 400px;
+    background: #00000021;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-box {
+    font-family: 'Courier New', monospace;
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    border: none;
+    outline: none;
+    background: #ffffff1c;
+}
+
+.input-area {
+    display: flex;
+    background: #35353527;
+    border-top: 0px solid #ccc;
+}
+
+.input-area input {
+    font-family: 'Courier New', monospace;
+    flex-grow: 1;
+    border: none;
+    padding: 10px;
+    background: rgba(29, 29, 29, 0.2);
+    outline: none;
+    backdrop-filter: blur(8px);
+    color: #ffffff;
+}
+
+.input-area input::placeholder {
+    color: rgba(255, 255, 255, 0.753);
+    font-family: 'Courier New', monospace;
+}
+
+.input-area button {
+    background: #ff0062;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.message {
+    margin: 8px 0;
+    padding: 8px 12px;
+    max-width: 80%;
+}
+
+.user {
+    background: #ff0062;
+    color: white;
+    align-self: flex-end;
+}
+
+.bot {
+    background: #35353571;
+    align-self: flex-start;
+}
