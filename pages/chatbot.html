@@ -1,26 +1,75 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chatbot Simple con API</title>
-    <link rel="stylesheet" href="../css/chatStyle.css" />
-    <link rel="stylesheet" href="../css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chatbot</title>
+  <link rel="stylesheet" href="../css/chatStyle.css" />
+  <link rel="stylesheet" href="../css/style.css" />
 </head>
 
 <body>
-    <header></header>
-    <div class="chat-container">
-        <div id="chat-box" class="chat-box"></div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Escribe un mensaje..." />
-            <button id="send-btn">Enviar</button>
-        </div>
+  <header></header>
+
+  <div class="chat-container">
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Escribe un mensaje..." />
+      <button id="send-btn">Enviar</button>
     </div>
+  </div>
 
-    <script src="../js/chatScript.js"></script>
-    <script src="../js/main.js"></script>
+  <script>
+    console.log("✅ chatbot.html cargado correctamente");
+
+    const input = document.querySelector("#user-input");
+    const sendBtn = document.querySelector("#send-btn");
+    const chatBox = document.querySelector("#chat-box");
+
+    // Enviar al hacer clic o presionar Enter
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    async function sendMessage() {
+      const message = input.value.trim();
+      if (!message) return;
+
+      addMessage("user", message);
+      input.value = "";
+
+      try {
+        console.log("📨 Enviando mensaje al backend:", message);
+
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        });
+
+        if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+
+        const data = await res.json();
+        console.log("📩 Respuesta del servidor:", data);
+
+        addMessage("bot", data.text || data.error || "No tengo respuesta 😅");
+      } catch (err) {
+        console.error("❌ Error al enviar mensaje:", err);
+        addMessage("bot", "Ocurrió un error al enviar tu mensaje 😅");
+      }
+    }
+
+    function addMessage(sender, text) {
+      const div = document.createElement("div");
+      div.className = sender;
+      div.textContent = `${sender === "user" ? "USER:" : "IVÁN:"} ${text}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+
+  <script src="../js/main.js"></script>
 </body>
-
 </html>

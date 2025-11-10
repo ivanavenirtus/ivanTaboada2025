@@ -1,70 +1,35 @@
-// chatScript.js
-document.addEventListener("DOMContentLoaded", () => {
+const form = document.querySelector("#chat-form");
+const input = document.querySelector("#user-input");
+const chatBox = document.querySelector("#chat-box");
 
-  // ===== FUNCIONES PRINCIPALES =====
-  async function sendMessage() {
-    const input = document.getElementById("user-input");
-    const message = input.value.trim();
-    if (message === "") return;
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const message = input.value.trim();
+  if (!message) return;
 
-    addMessage("user", message);
-    input.value = "";
+  addMessage("user", message);
+  input.value = "";
 
-    addMessage("bot", "Escribiendo...");
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
 
-    try {
-      // Llamada al endpoint seguro
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message })
-      });
+    const data = await res.json();
+    console.log("📩 Respuesta del servidor:", data);
 
-      const data = await response.json();
-      console.log(data); // útil para depurar
-
-      let botText = "No tengo respuesta en este momento 😅";
-      if (data?.response) botText = data.response;
-
-      replaceLastBotMessage(botText);
-
-    } catch (error) {
-      console.error("Error al conectar con la API:", error);
-      replaceLastBotMessage("Ocurrió un error al enviar tu mensaje 😓");
-    }
+    addMessage("bot", data.text || data.error || "No tengo respuesta 😅");
+  } catch (err) {
+    console.error("❌ Error al enviar mensaje:", err);
+    addMessage("bot", "Ocurrió un error al enviar tu mensaje 😅");
   }
-
-  const sendBtn = document.getElementById("send-btn");
-  const input = document.getElementById("user-input");
-
-  sendBtn.addEventListener("click", () => sendMessage());
-  input.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendMessage();
-  });
-
-
-  function addMessage(sender, text) {
-    const chatBox = document.getElementById("chat-box");
-    const msgDiv = document.createElement("div");
-    msgDiv.classList.add("message", sender);
-    msgDiv.textContent = text;
-    chatBox.appendChild(msgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  function replaceLastBotMessage(text) {
-    const chatBox = document.getElementById("chat-box");
-    const last = [...chatBox.getElementsByClassName("bot")].pop();
-    if (last) last.textContent = text;
-  }
-
-  // ===== EVENTOS =====
-  // Enter para enviar
-  document.getElementById("user-input").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendMessage();
-  });
-
-  // Botón para enviar
-  document.getElementById("send-btn").addEventListener("click", sendMessage);
-
 });
+
+function addMessage(sender, text) {
+  const div = document.createElement("div");
+  div.className = sender;
+  div.textContent = text;
+  chatBox.appendChild(div);
+}
