@@ -34,6 +34,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  const sendBtn = document.getElementById("send-btn");
+  const input = document.getElementById("user-input");
+
+  sendBtn.addEventListener("click", () => sendMessage());
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+  });
+
+
   function addMessage(sender, text) {
     const chatBox = document.getElementById("chat-box");
     const msgDiv = document.createElement("div");
