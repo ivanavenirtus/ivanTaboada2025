@@ -15,7 +15,7 @@ async function sendMessage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "API_KEY_AQUI"
+          "Authorization": HUGGINGFACE_API_KEY
         },
         body: JSON.stringify({
           inputs: message
