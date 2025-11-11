@@ -8,15 +8,23 @@ export default async function handler(req, res) {
             return res.status(405).json({ error: 'Método no permitido' });
         }
 
-        const userMessage = req.body.message || "";
+        // 🔹 Recibir y limpiar mensaje
+        const userMessage = (req.body.message || "").trim();
+        if (!userMessage) {
+            return res.status(400).json({ text: "Por favor escribe un mensaje." });
+        }
+
+        console.log("📨 Mensaje recibido:", userMessage);
 
         // 🔹 Verificar primero la respuesta local (nombre, hora, clima)
         const localResponse = await getLocalResponse(userMessage);
         if (localResponse) {
+            console.log("✅ Respuesta local detectada:", localResponse);
             return res.status(200).json({ text: localResponse });
         }
 
         // 🚀 Si no hay respuesta local, enviar a OpenAI
+        console.log("🌐 No se detectó respuesta local, enviando a OpenAI...");
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -42,7 +50,7 @@ export default async function handler(req, res) {
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content?.trim() || "No tengo respuesta 😅";
 
-        // 🔹 Siempre devolver un objeto con 'text'
+        console.log("📩 Respuesta de OpenAI:", text);
         res.status(200).json({ text });
 
     } catch (error) {

@@ -88,10 +88,10 @@ export const weatherKeywords = [
 function normalizeMessage(message) {
     return message
         .toLowerCase()
-        .trim()
+        .trim()             
         .replace(/^¿+/, "")
         .replace(/\?+$/, "")
-        .replace(/\s+/g, " ")
+        .replace(/\s+/g, " ") 
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
