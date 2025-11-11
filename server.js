@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import fetch from "node-fetch";
 
 // Importa funciones locales
-import { getLocalResponse } from "./localResponses.js";
+import { getLocalResponse } from "./api/localResponses.js";
 
 dotenv.config();
 
