@@ -84,7 +84,7 @@ export const weatherKeywords = [
     "tell me the temperature"
 ];
 
-// Normalizar mensaje: quitar ¿, ?, espacios y pasar a minúsculas
+// Normalizar mensaje: quitar ¿, ?, espacios extra y acentos
 function normalizeMessage(message) {
     return message
         .toLowerCase()
@@ -94,7 +94,6 @@ function normalizeMessage(message) {
         .replace(/\s+/g, " ")
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
-
 
 // Extraer ciudad del mensaje (ej. "clima en Cancún")
 function extractCity(message) {
@@ -160,27 +159,25 @@ export async function getLocalResponse(userMessage) {
     if (isWeather) {
         try {
             const apiKey = process.env.OPENWEATHER_API_KEY;
-            const city = extractCity(userMessage);
-            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=es`;
 
+            // Normalizar mensaje a "la temperatura en <ciudad>"
+            const city = extractCity(userMessage); // extrae ciudad si existe
+            const standardMessage = `la temperatura en ${city}`;
+
+            // Fetch a OpenWeather
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=es`;
             const weatherRes = await fetch(url);
             const data = await weatherRes.json();
 
             if (data?.main?.temp != null) {
                 const temp = Math.round(data.main.temp);
-                respuesta = normalizedMessage.includes("what") ?
-                    `The current temperature in ${city} is ${temp}°C` :
-                    `La temperatura actual en ${city} es ${temp}°C`;
+                respuesta = `La temperatura actual en ${city} es ${temp}°C`;
             } else {
-                respuesta = normalizedMessage.includes("what") ?
-                    "I couldn't get the temperature 😅" :
-                    "No pude obtener la temperatura 😅";
+                respuesta = "No pude obtener la temperatura 😅";
             }
         } catch (err) {
             console.error("Error obteniendo el clima:", err);
-            respuesta = normalizedMessage.includes("what") ?
-                "I couldn't get the temperature 😅" :
-                "No pude obtener la temperatura 😅";
+            respuesta = "No pude obtener la temperatura 😅";
         }
     }
 
