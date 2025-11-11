@@ -1,5 +1,4 @@
 // /api/chat.js
-import { json } from '@vercel/node'; // opcional si usas Vercel Node
 import { getLocalResponse } from '../../localResponses.js'; // ajusta la ruta
 import fetch from 'node-fetch';
 
