@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+
 export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Palabras clave en español
@@ -62,7 +63,17 @@ function normalizeMessage(message) {
         .replace(/\?+$/, ""); // quitar signos de cierre de pregunta
 }
 
-// Función para obtener respuesta local según el mensaje
+// Extraer ciudad del mensaje (ej. "clima en Cancún")
+function extractCity(message) {
+    const regex = /en\s+([a-zA-ZÀ-ÿ\s]+)/i;
+    const match = message.match(regex);
+    if (match && match[1]) {
+        return match[1].trim();
+    }
+    return "Mexico City"; // valor por defecto
+}
+
+// Función principal de respuestas locales
 export async function getLocalResponse(userMessage) {
     const normalizedMessage = normalizeMessage(userMessage);
 
@@ -111,11 +122,11 @@ export async function getLocalResponse(userMessage) {
             `La hora actual es ${formattedTime}`;
     }
 
-
+    // Respuestas de clima
     if (isWeather) {
         try {
             const apiKey = process.env.OPENWEATHER_API_KEY;
-            const city = "Mexico City"; // o extraer del mensaje del usuario
+            const city = extractCity(userMessage);
             const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=es`;
 
             const weatherRes = await fetch(url);
@@ -138,7 +149,6 @@ export async function getLocalResponse(userMessage) {
                 "No pude obtener la temperatura 😅";
         }
     }
-
 
     // Delay aleatorio si hay respuesta local
     if (respuesta) {
