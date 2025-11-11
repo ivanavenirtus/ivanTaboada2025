@@ -119,7 +119,8 @@ export async function getLocalResponse(userMessage) {
     const isTime = timeKeywords.some(keyword =>
         normalizedMessage.includes(normalizeMessage(keyword))
     );
-    const isWeather = weatherKeywords.some(keyword => new RegExp(`\\b${normalizeMessage(keyword)}\\b`).test(normalizedMessage)
+    const isWeather = weatherKeywords.some(keyword =>
+        new RegExp(`\\b${normalizeMessage(keyword)}\\b`).test(normalizedMessage)
     );
 
 

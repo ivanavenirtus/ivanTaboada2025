@@ -32,5 +32,5 @@ function addMessage(sender, text) {
   div.className = sender;
   div.textContent = text;
   chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight; // auto-scrollea hacia abajo
+  chatBox.scrollTop = chatBox.scrollHeight; 
 }
