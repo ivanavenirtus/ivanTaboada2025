@@ -52,7 +52,7 @@
         if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
 
         const data = await res.json();
-        console.log("📩 Respuesta del servidor:", data);
+        console.log("📩 Respuesta del servidor:", JSON.stringify(data));
 
         addMessage("bot", data.text || data.error || "No tengo respuesta 😅");
       } catch (err) {
