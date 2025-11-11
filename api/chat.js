@@ -1,5 +1,5 @@
 // /api/chat.js
-import { getLocalResponse } from '../../localResponses.js'; // ajusta la ruta
+import { getLocalResponse } from './localResponses.js';
 import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
