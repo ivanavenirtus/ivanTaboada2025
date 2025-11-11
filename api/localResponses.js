@@ -84,7 +84,7 @@ export const weatherKeywords = [
     "tell me the temperature"
 ];
 
-// Normalizar mensaje: quitar ¿, ?, espacios extra y acentos
+// Normalizar mensaje: quitar ¿, ?, espacios y pasar a minúsculas
 function normalizeMessage(message) {
     return message
         .toLowerCase()
@@ -105,9 +105,17 @@ function extractCity(message) {
     return "Mexico City"; // valor por defecto
 }
 
+// Detecta si el mensaje es inglés o español
+function detectLanguage(message) {
+    const normalized = normalizeMessage(message);
+    const englishWords = ["what", "weather", "temperature"];
+    return englishWords.some(word => normalized.includes(word)) ? "en" : "es";
+}
+
 // Función principal de respuestas locales
 export async function getLocalResponse(userMessage) {
     const normalizedMessage = normalizeMessage(userMessage);
+    const lang = detectLanguage(userMessage);
 
     const isSpanishName = spanishKeywords.some(keyword =>
         normalizedMessage.includes(normalizeMessage(keyword))
@@ -119,7 +127,7 @@ export async function getLocalResponse(userMessage) {
         normalizedMessage.includes(normalizeMessage(keyword))
     );
     const isWeather = weatherKeywords.some(keyword =>
-        normalizedMessage.includes(normalizeMessage(keyword))
+        new RegExp(`\\b${normalizeMessage(keyword)}\\b`).test(normalizedMessage)
     );
 
     let respuesta = null;
@@ -150,7 +158,7 @@ export async function getLocalResponse(userMessage) {
         const options = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Mexico_City' };
         const formattedTime = new Intl.DateTimeFormat('es-ES', options).format(now);
 
-        respuesta = normalizedMessage.includes("what") ?
+        respuesta = lang === "en" ?
             `The current time is ${new Intl.DateTimeFormat('en-US', options).format(now)}` :
             `La hora actual es ${formattedTime}`;
     }
@@ -159,25 +167,27 @@ export async function getLocalResponse(userMessage) {
     if (isWeather) {
         try {
             const apiKey = process.env.OPENWEATHER_API_KEY;
+            const city = extractCity(userMessage);
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=${lang}`;
 
-            // Normalizar mensaje a "la temperatura en <ciudad>"
-            const city = extractCity(userMessage); // extrae ciudad si existe
-            const standardMessage = `la temperatura en ${city}`;
-
-            // Fetch a OpenWeather
-            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=es`;
             const weatherRes = await fetch(url);
             const data = await weatherRes.json();
 
             if (data?.main?.temp != null) {
                 const temp = Math.round(data.main.temp);
-                respuesta = `La temperatura actual en ${city} es ${temp}°C`;
+                respuesta = lang === "en" ?
+                    `The current temperature in ${city} is ${temp}°C` :
+                    `La temperatura actual en ${city} es ${temp}°C`;
             } else {
-                respuesta = "No pude obtener la temperatura 😅";
+                respuesta = lang === "en" ?
+                    "I couldn't get the temperature 😅" :
+                    "No pude obtener la temperatura 😅";
             }
         } catch (err) {
             console.error("Error obteniendo el clima:", err);
-            respuesta = "No pude obtener la temperatura 😅";
+            respuesta = lang === "en" ?
+                "I couldn't get the temperature 😅" :
+                "No pude obtener la temperatura 😅";
         }
     }
 
