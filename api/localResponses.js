@@ -108,16 +108,16 @@ export async function getLocalResponse(userMessage) {
     const normalizedMessage = normalizeMessage(userMessage);
 
     const isSpanishName = spanishKeywords.some(keyword =>
-        normalizedMessage.startsWith(normalizeMessage(keyword))
+        normalizedMessage.includes(normalizeMessage(keyword))
     );
     const isEnglishName = englishKeywords.some(keyword =>
-        normalizedMessage.startsWith(normalizeMessage(keyword))
+        normalizedMessage.includes(normalizeMessage(keyword))
     );
     const isTime = timeKeywords.some(keyword =>
-        normalizedMessage.startsWith(normalizeMessage(keyword))
+        normalizedMessage.includes(normalizeMessage(keyword))
     );
     const isWeather = weatherKeywords.some(keyword =>
-        normalizedMessage.startsWith(normalizeMessage(keyword))
+        normalizedMessage.includes(normalizeMessage(keyword))
     );
 
     let respuesta = null;
@@ -127,7 +127,8 @@ export async function getLocalResponse(userMessage) {
         const respuestas = [
             "Me gusta que me digan Iván",
             "Puedes llamarme Iván, suena bien, ¿no crees?",
-            "Me conocen como Iván"
+            "Me conocen como Iván",
+            "Me puedes llamar Iván"
         ];
         respuesta = respuestas[Math.floor(Math.random() * respuestas.length)];
     }
