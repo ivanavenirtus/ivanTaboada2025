@@ -103,24 +103,12 @@ export async function getLocalResponse(userMessage) {
     // Respuestas de hora
     if (isTime) {
         const now = new Date();
-        const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-        if (userMessage.toLowerCase().includes("what")) {
-            respuesta = `The current time is ${timeStr}`;
-        } else {
-            respuesta = `La hora actual es ${timeStr}`;
-        }
-    }
-
-    if (isTime) {
-        const now = new Date();
         const options = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Mexico_City' };
         const formattedTime = new Intl.DateTimeFormat('es-ES', options).format(now);
 
-        respuesta = `La hora actual es ${formattedTime}`;
-        if (userMessage.toLowerCase().includes("what")) {
-            const formattedTimeEn = new Intl.DateTimeFormat('en-US', options).format(now);
-            respuesta = `The current time is ${formattedTimeEn}`;
-        }
+        respuesta = normalizedMessage.includes("what") ?
+            `The current time is ${new Intl.DateTimeFormat('en-US', options).format(now)}` :
+            `La hora actual es ${formattedTime}`;
     }
 
 
