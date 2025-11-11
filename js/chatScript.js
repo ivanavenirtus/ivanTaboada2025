@@ -2,12 +2,34 @@ const form = document.querySelector("#chat-form");
 const input = document.querySelector("#user-input");
 const chatBox = document.querySelector("#chat-box");
 
+// Función para detectar si el mensaje habla de clima
+function normalizeWeatherMessage(message) {
+  const lower = message.toLowerCase();
+  if (
+    lower.includes("clima") ||
+    lower.includes("temperatura") ||
+    lower.includes("weather") ||
+    lower.includes("temperature")
+  ) {
+    // Devuelve mensaje estándar según idioma
+    if (lower.match(/[a-z]/)) { // si hay letras inglesas
+      return "the weather";
+    } else {
+      return "la temperatura";
+    }
+  }
+  return message; // si no, devuelve el mensaje original
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const message = input.value.trim();
+  let message = input.value.trim();
   if (!message) return;
 
-  addMessage("user", message);
+  // Normalizamos el mensaje si habla de clima
+  message = normalizeWeatherMessage(message);
+
+  addMessage("user", input.value.trim()); // mostramos el mensaje original
   input.value = "";
 
   try {
@@ -30,7 +52,7 @@ form.addEventListener("submit", async (e) => {
 function addMessage(sender, text) {
   const div = document.createElement("div");
   div.className = sender;
-  div.textContent = text;
+  div.textContent = `${sender === "user" ? "USER:" : "IVÁN:"} ${text}`;
   chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight; 
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
