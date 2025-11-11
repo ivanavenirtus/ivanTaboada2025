@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chatbot</title>
+    <title>CHATBOT</title>
     <link rel="stylesheet" href="../css/chatStyle.css" />
     <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" href="../assets/icons/logo.png" type="image/png" sizes="24x24">
+  <link rel="apple-touch-icon" href="../assets/icons/logo.png" sizes="180x180">
 </head>
 
 <body>
@@ -21,15 +23,13 @@
         </div>
     </div>
 
-
     <script>
-        console.log("✅ chatbot.html cargado correctamente");
+        console.log("chatbot.html cargado correctamente");
 
         const input = document.querySelector("#user-input");
         const sendBtn = document.querySelector("#send-btn");
         const chatBox = document.querySelector("#chat-box");
 
-        // Enviar al hacer clic o presionar Enter
         sendBtn.addEventListener("click", sendMessage);
         input.addEventListener("keypress", (e) => {
             if (e.key === "Enter") sendMessage();
@@ -43,7 +43,7 @@
             input.value = "";
 
             try {
-                console.log("📨 Enviando mensaje al backend:", message);
+                console.log("Enviando mensaje al backend:", message);
 
                 const res = await fetch("/api/chat", {
                     method: "POST",
@@ -54,12 +54,12 @@
                 if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
 
                 const data = await res.json();
-                console.log("📩 Respuesta del servidor:", JSON.stringify(data));
+                console.log("Respuesta del servidor:", JSON.stringify(data));
 
-                addMessage("bot", data.text || data.error || "No tengo respuesta 😅");
+                addMessage("bot", data.text || data.error || "No tengo respuesta");
             } catch (err) {
-                console.error("❌ Error al enviar mensaje:", err);
-                addMessage("bot", "Ocurrió un error al enviar tu mensaje 😅");
+                console.error("Error al enviar mensaje:", err);
+                addMessage("bot", "Ocurrió un error al enviar tu mensaje");
             }
         }
 
@@ -87,7 +87,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             const elements = document.querySelectorAll(".typewriter");
             elements.forEach(el => {
-                typeWriter(el, 100); // 100ms por carácter
+                typeWriter(el, 100);
             });
         });
     </script>
