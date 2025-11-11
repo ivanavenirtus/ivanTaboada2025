@@ -328,7 +328,7 @@ body.subpage main {
   white-space: pre-wrap;
   overflow: hidden;
   min-width: 20ch;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.3s ease;
 }
 
@@ -348,16 +348,18 @@ h1.typewriter {
 }
 
 h2.typewriter {
-  font-weight: 700;
-  font-size: 2.2rem;
-  margin: 0;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 0; /* empieza invisible */
+    animation: typing 2s steps(18, end) forwards; /* 17 = "Ask me anything!" */
 }
 
-.cursor::after {
-  content: '|';
-  display: inline-block;
-  margin-left: 5px;
-  animation: blink 0.7s infinite;
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
 }
 
 @keyframes blink {
