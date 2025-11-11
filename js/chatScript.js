@@ -18,7 +18,7 @@ form.addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
-    console.log("📩 Respuesta del servidor:", data);
+    console.log("📩 Respuesta del servidor:", data.text || data.error);
 
     addMessage("bot", data.text || data.error || "No tengo respuesta 😅");
   } catch (err) {
@@ -32,4 +32,5 @@ function addMessage(sender, text) {
   div.className = sender;
   div.textContent = text;
   chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight; // auto-scrollea hacia abajo
 }
