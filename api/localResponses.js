@@ -111,6 +111,19 @@ export async function getLocalResponse(userMessage) {
         }
     }
 
+    if (isTime) {
+    const now = new Date();
+    const options = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Mexico_City' };
+    const formattedTime = new Intl.DateTimeFormat('es-ES', options).format(now);
+    
+    respuesta = `La hora actual es ${formattedTime}`;
+    if (userMessage.toLowerCase().includes("what")) {
+        const formattedTimeEn = new Intl.DateTimeFormat('en-US', options).format(now);
+        respuesta = `The current time is ${formattedTimeEn}`;
+    }
+}
+
+
     // Respuestas de clima/temperatura (ejemplo estático, puedes usar API real)
     if (isWeather) {
         if (userMessage.toLowerCase().includes("what")) {
