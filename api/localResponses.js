@@ -36,10 +36,22 @@ export const timeKeywords = [
     "dame la hora",
     "cual es la hora",
     "la hora",
+    "qué hora tenemos",
+    "puedes decirme la hora",
+    "hora por favor",
+    "me dices la hora",
+    "sabes la hora",
+    "qué hora tienes",
+    "qué hora son",
     "what time is it",
     "current time",
     "tell me the time",
-    "the time"
+    "the time",
+    "can you tell me the time",
+    "time now",
+    "what's the time",
+    "do you know the time",
+    "give me the time"
 ];
 
 // Keywords clima/temperatura
@@ -48,10 +60,28 @@ export const weatherKeywords = [
     "cómo está el clima",
     "temperatura actual",
     "la temperatura",
+    "qué clima hace",
+    "cómo está el tiempo",
+    "dime la temperatura",
+    "dame la temperatura",
+    "dame el clima",
+    "dime el clima",
+    "sabes la temperatura",
+    "sabes el clima",
+    "temperatura por favor",
+    "clima actual",
+    "qué temperatura hay",
     "current temperature",
     "what's the weather",
     "how's the weather",
-    "the weather"
+    "the weather",
+    "weather now",
+    "current weather",
+    "what's the temperature",
+    "give me the weather",
+    "give me the temperature",
+    "temperature now",
+    "tell me the temperature"
 ];
 
 // Normalizar mensaje: quitar ¿, ?, espacios y pasar a minúsculas
