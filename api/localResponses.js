@@ -88,10 +88,10 @@ export const weatherKeywords = [
 function normalizeMessage(message) {
     return message
         .toLowerCase()
-        .trim()             
+        .trim()
         .replace(/^¿+/, "")
         .replace(/\?+$/, "")
-        .replace(/\s+/g, " ") 
+        .replace(/\s+/g, " ")
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
@@ -120,9 +120,8 @@ export async function getLocalResponse(userMessage) {
         normalizedMessage.includes(normalizeMessage(keyword))
     );
     const isWeather = weatherKeywords.some(keyword =>
-        new RegExp(`\\b${normalizeMessage(keyword)}\\b`).test(normalizedMessage)
+        normalizedMessage.includes(normalizeMessage(keyword))
     );
-
 
     let respuesta = null;
 
