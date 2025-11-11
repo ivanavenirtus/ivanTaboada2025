@@ -9,12 +9,14 @@ export default async function handler(req, res) {
         }
 
         const userMessage = req.body.message || "";
+
+        // 🔹 Verificar primero la respuesta local (nombre, hora, clima)
         const localResponse = await getLocalResponse(userMessage);
         if (localResponse) {
             return res.status(200).json({ text: localResponse });
         }
 
-        // Petición a OpenAI
+        // 🚀 Si no hay respuesta local, enviar a OpenAI
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -32,17 +34,19 @@ export default async function handler(req, res) {
         });
 
         if (!response.ok) {
-            const text = await response.text();
-            console.error("❌ Error HTTP:", response.status, text);
-            return res.status(500).json({ error: "Error al conectar con OpenAI" });
+            const errorText = await response.text();
+            console.error("❌ Error HTTP:", response.status, errorText);
+            return res.status(500).json({ text: "No pude obtener respuesta 😅" });
         }
 
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content?.trim() || "No tengo respuesta 😅";
+
+        // 🔹 Siempre devolver un objeto con 'text'
         res.status(200).json({ text });
 
     } catch (error) {
         console.error("💥 Error interno:", error);
-        res.status(500).json({ error: "Error interno del servidor" });
+        res.status(500).json({ text: "Ocurrió un error interno 😅" });
     }
 }
