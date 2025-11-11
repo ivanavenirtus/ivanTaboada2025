@@ -1,4 +1,4 @@
-// Delay asíncrono
+import fetch from "node-fetch";
 export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Palabras clave en español
@@ -112,26 +112,45 @@ export async function getLocalResponse(userMessage) {
     }
 
     if (isTime) {
-    const now = new Date();
-    const options = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Mexico_City' };
-    const formattedTime = new Intl.DateTimeFormat('es-ES', options).format(now);
-    
-    respuesta = `La hora actual es ${formattedTime}`;
-    if (userMessage.toLowerCase().includes("what")) {
-        const formattedTimeEn = new Intl.DateTimeFormat('en-US', options).format(now);
-        respuesta = `The current time is ${formattedTimeEn}`;
-    }
-}
+        const now = new Date();
+        const options = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Mexico_City' };
+        const formattedTime = new Intl.DateTimeFormat('es-ES', options).format(now);
 
-
-    // Respuestas de clima/temperatura (ejemplo estático, puedes usar API real)
-    if (isWeather) {
+        respuesta = `La hora actual es ${formattedTime}`;
         if (userMessage.toLowerCase().includes("what")) {
-            respuesta = "The current temperature is 25°C";
-        } else {
-            respuesta = "La temperatura actual es 25°C";
+            const formattedTimeEn = new Intl.DateTimeFormat('en-US', options).format(now);
+            respuesta = `The current time is ${formattedTimeEn}`;
         }
     }
+
+
+    if (isWeather) {
+        try {
+            const apiKey = process.env.OPENWEATHER_API_KEY;
+            const city = "Mexico City"; // o extraer del mensaje del usuario
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=es`;
+
+            const weatherRes = await fetch(url);
+            const data = await weatherRes.json();
+
+            if (data?.main?.temp != null) {
+                const temp = Math.round(data.main.temp);
+                respuesta = normalizedMessage.includes("what") ?
+                    `The current temperature in ${city} is ${temp}°C` :
+                    `La temperatura actual en ${city} es ${temp}°C`;
+            } else {
+                respuesta = normalizedMessage.includes("what") ?
+                    "I couldn't get the temperature 😅" :
+                    "No pude obtener la temperatura 😅";
+            }
+        } catch (err) {
+            console.error("Error obteniendo el clima:", err);
+            respuesta = normalizedMessage.includes("what") ?
+                "I couldn't get the temperature 😅" :
+                "No pude obtener la temperatura 😅";
+        }
+    }
+
 
     // Delay aleatorio si hay respuesta local
     if (respuesta) {
