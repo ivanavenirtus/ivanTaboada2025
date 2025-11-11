@@ -89,9 +89,12 @@ function normalizeMessage(message) {
     return message
         .toLowerCase()
         .trim()
-        .replace(/^¿+/, "")   // quitar signos de apertura de pregunta
-        .replace(/\?+$/, ""); // quitar signos de cierre de pregunta
+        .replace(/^¿+/, "")
+        .replace(/\?+$/, "")
+        .replace(/\s+/g, " ")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
+
 
 // Extraer ciudad del mensaje (ej. "clima en Cancún")
 function extractCity(message) {
@@ -119,6 +122,7 @@ export async function getLocalResponse(userMessage) {
     const isWeather = weatherKeywords.some(keyword =>
         normalizedMessage.includes(normalizeMessage(keyword))
     );
+
 
     let respuesta = null;
 
