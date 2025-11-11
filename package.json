@@ -2,7 +2,7 @@
   "name": "ivantaboada2025",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },

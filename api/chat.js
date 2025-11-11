@@ -1,44 +1,49 @@
-async function sendMessage() {
-    const input = document.getElementById("user-input");
-    const message = input.value.trim();
-    if (!message) return;
+// /api/chat.js
+import { json } from '@vercel/node'; // opcional si usas Vercel Node
+import { getLocalResponse } from '../../localResponses.js'; // ajusta la ruta
+import fetch from 'node-fetch';
 
-    addMessage("user", message);
-    input.value = "";
-
-    const botMessageIndex = addMessage("bot", "Escribiendo...");
-
+export default async function handler(req, res) {
     try {
-        const response = await fetch("/api/chat", {
+        if (req.method !== 'POST') {
+            return res.status(405).json({ error: 'Método no permitido' });
+        }
+
+        const userMessage = req.body.message || "";
+        const localResponse = await getLocalResponse(userMessage);
+        if (localResponse) {
+            return res.status(200).json({ text: localResponse });
+        }
+
+        // Petición a OpenAI
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message }),
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: "Eres un asistente útil y amable." },
+                    { role: "user", content: userMessage },
+                ],
+                max_tokens: 200,
+            }),
         });
 
+        if (!response.ok) {
+            const text = await response.text();
+            console.error("❌ Error HTTP:", response.status, text);
+            return res.status(500).json({ error: "Error al conectar con OpenAI" });
+        }
+
         const data = await response.json();
-        const botText = (data && typeof data.text === "string")
-            ? data.text
-            : "No tengo respuesta en este momento 😅";
+        const text = data.choices?.[0]?.message?.content?.trim() || "No tengo respuesta 😅";
+        res.status(200).json({ text });
 
-        replaceLastBotMessage(botText);
     } catch (error) {
-        console.error("Error al enviar el mensaje:", error);
-        replaceLastBotMessage("Ocurrió un error al enviar tu mensaje 😅");
+        console.error("💥 Error interno:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
-}
-
-function addMessage(sender, text) {
-    const chatBox = document.getElementById("chat-box");
-    const msgDiv = document.createElement("div");
-    msgDiv.classList.add("message", sender);
-    msgDiv.textContent = text;
-    chatBox.appendChild(msgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    return chatBox.getElementsByClassName(sender).length - 1; // Devuelve índice opcional
-}
-
-function replaceLastBotMessage(text) {
-    const chatBox = document.getElementById("chat-box");
-    const last = [...chatBox.getElementsByClassName("bot")].pop();
-    if (last) last.textContent = text;
 }
