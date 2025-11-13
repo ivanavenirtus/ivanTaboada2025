@@ -84,6 +84,18 @@ export const weatherKeywords = [
     "tell me the temperature"
 ];
 
+// Keywords fecha
+export const dateKeywords = [
+    "qué día es",
+    "qué fecha es",
+    "dame la fecha",
+    "cual es la fecha",
+    "today's date",
+    "what is the date",
+    "give me the date",
+    "current date"
+];
+
 // Normalizar mensaje: quitar ¿, ?, espacios y pasar a minúsculas
 function normalizeMessage(message) {
     return message
@@ -143,6 +155,23 @@ export async function getLocalResponse(userMessage) {
         respuesta = respuestas[Math.floor(Math.random() * respuestas.length)];
     }
 
+    const isDate = dateKeywords.some(keyword =>
+        normalizedMessage.includes(normalizeMessage(keyword))
+    );
+
+    // Respuesta de fecha
+    if (isDate) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Mexico_City' };
+        const formattedDate = lang === "en" ?
+            new Intl.DateTimeFormat('en-US', options).format(now) :
+            new Intl.DateTimeFormat('es-ES', options).format(now);
+
+        respuesta = lang === "en" ?
+            `Today's date is ${formattedDate}` :
+            `La fecha de hoy es ${formattedDate}`;
+    }
+
     if (isEnglishName) {
         const respuestas = [
             "You can call me Ivan, sounds nice, right?",
@@ -180,14 +209,14 @@ export async function getLocalResponse(userMessage) {
                     `La temperatura actual en ${city} es ${temp}°C`;
             } else {
                 respuesta = lang === "en" ?
-                    "I couldn't get the temperature 😅" :
-                    "No pude obtener la temperatura 😅";
+                    "I couldn't get the temperature" :
+                    "No pude obtener la temperatura";
             }
         } catch (err) {
             console.error("Error obteniendo el clima:", err);
             respuesta = lang === "en" ?
-                "I couldn't get the temperature 😅" :
-                "No pude obtener la temperatura 😅";
+                "I couldn't get the temperature" :
+                "No pude obtener la temperatura";
         }
     }
 

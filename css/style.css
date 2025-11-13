@@ -43,29 +43,38 @@ body {
   width: 95%;
   max-width: 1000px;
   margin: 0 auto;
-  gap: 1rem;
-  min-height: 400px;
-  /* altura mínima */
-  height: 40vh;
-  /* altura total del bloque en desktop */
+  gap: 0.5rem;
+  height: 50vh;
 }
 
-.editor,
-#output {
-  flex: 1;
-  width: 100%;
+.editor {
+  flex: 3;
+  min-height: 200px;
   padding: 1rem;
   font-family: monospace;
   font-size: 1.2rem;
   line-height: 1.4rem;
-  overflow-y: auto;
   background-color: #00000093;
   color: #ff4c82;
+  overflow-y: auto;
   white-space: pre-wrap;
   border: none;
   box-sizing: border-box;
-  margin: 0;
-  max-height: 500px;
+}
+
+#output {
+  flex: 2;
+  min-height: 150px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 1.2rem;
+  line-height: 1.4rem;
+  background-color: #00000093;
+  color: #ff4c82;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  border: none;
+  box-sizing: border-box;
 }
 
 .btn-container {

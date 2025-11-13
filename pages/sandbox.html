@@ -15,7 +15,8 @@
         .btn-container {
             display: flex;
             justify-content: flex-end;
-            margin-bottom: 0.5rem; /* separa un poco del editor */
+            margin-bottom: 0.5rem;
+            /* separa un poco del editor */
         }
 
         button#run {
@@ -65,13 +66,12 @@
                 const leadingSpaces = line.match(/^\s*/)[0].length;
                 const indent = Math.floor(leadingSpaces / 4);
                 line = line.trim();
-
-                line = line.replace(/print\s+"([^"]+)"/g, 'print("$1")');
-                line = line.replace(/^(if .*|elif .*|else|while .*|for .*|def .*|class .*?)$/, '$1:');
                 line = line.replace(/\bnew\s+([A-Z]\w*)\b/g, '$1()');
-
+                line = line.replace(/print\s+"([^"]+)"/g, 'print("$1")');
+                line = line.replace(/^(if .*|elif .*|else|while .*|for .*|def .*|class .*?)$/, (match) => {
+                    return match.endsWith(":") ? match : match + ":";
+                });
                 if (/^[a-z_]\w*\.[a-z_]\w*$/.test(line)) line = line + "()";
-
                 result.push("    ".repeat(indent) + line);
             }
             return result.join("\n");
@@ -83,6 +83,7 @@
             const pythonCode = transpile(src);
             const out = document.getElementById("output");
             out.textContent = "";
+            editor.innerHTML = editor.innerText; 
 
             function highlightError(lineNumber) {
                 const lines = editor.innerText.split("\n");
@@ -104,8 +105,6 @@
                 out.textContent = "X Error de sintaxis:\n" + err;
             }
         };
-
-        // Soporte de tabulación
         const editor = document.getElementById("editor");
         editor.addEventListener("keydown", function (e) {
             if (e.key === "Tab") {
