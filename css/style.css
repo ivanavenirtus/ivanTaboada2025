@@ -37,22 +37,79 @@ body {
   animation: gradientMove 55s ease infinite;
 }
 
-.editor {
-  background-color: #000;
-  color: #ff00a0;
-  font-size: 1.2rem;
-  padding: 1rem;
-  width: 70%;
-  max-width: 700px;
+.editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 95%;
+  max-width: 1000px;
+  margin: 0 auto;
+  gap: 1rem;
+  min-height: 400px;
+  /* altura mínima */
   height: 40vh;
-  min-height: 200px;
-  max-height: 500px;
-  box-sizing: border-box;
-  border: none;
+  /* altura total del bloque en desktop */
+}
+
+.editor,
+#output {
+  flex: 1;
+  width: 100%;
+  padding: 1rem;
   font-family: monospace;
-  white-space: pre;
+  font-size: 1.2rem;
+  line-height: 1.4rem;
   overflow-y: auto;
-  outline: none;
+  background-color: #00000093;
+  color: #ff4c82;
+  white-space: pre-wrap;
+  border: none;
+  box-sizing: border-box;
+  margin: 0;
+  max-height: 500px;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 1000px;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 980px) {
+
+  .editor-wrapper {
+    height: 35vh;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 760px) {
+
+  .editor,
+  #output {
+    width: 95%;
+    min-height: 30vh;
+    height: 35vh;
+  }
+}
+
+@media (max-width: 630px) {
+
+  .editor,
+  #output {
+    width: 95%;
+    min-height: 25vh;
+    height: 30vh;
+  }
+}
+
+
+.btn-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 1000px;
 }
 
 .error-line {
@@ -123,17 +180,8 @@ p.typewriter.desc.visible {
   z-index: 1;
 }
 
-.btn-container {
-  display: flex;
-  justify-content: flex-end;
-  width: 90%;
-  max-width: 800px;
-  margin-top: 1rem;
-}
-
 button#run {
   width: 120px;
-  /* ancho del botón */
   font-size: 1.2rem;
   padding: 0.8rem 1.5rem;
 }
@@ -416,16 +464,16 @@ h2.typewriter {
 }
 
 /* === RESPONSIVE === */
-@media (min-width: 1200px) {
-
-  #editor,
-  #output {
-    width: 1200px;
-    max-width: none;
-  }
-}
 
 @media (max-width: 980px) {
+
+  .editor,
+  #output {
+    width: 95%;
+    min-height: 25vh;
+    height: 35vh;
+  }
+
   :root {
     --img-scale: 2.8;
     --img-shift: 0%;

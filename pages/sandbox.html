@@ -11,43 +11,14 @@
     <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
     <script src="../js/main.js" defer></script>
     <style>
-        /* Editor */
-        #editor {
-            background-color: #00000093;
-            color: #ff4c82;
-            font-family: monospace;
-            font-size: 1.2rem;
-            padding: 1rem;
-            min-height: 200px;
-            max-height: 500px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            border: none;
-            resize: vertical;
-        }
-
-        /* Output */
-        #output {
-            background-color: #00000093;
-            color: #ff4c82;
-            font-size: 1.3rem;
-            padding: 1rem;
-            min-height: 200px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            box-sizing: border-box;
-        }
-
-        /* Botón a la derecha */
+        /* Botón container y botón run */
         .btn-container {
             display: flex;
             justify-content: flex-end;
-            width: 100%;
-            max-width: 800px;
-            margin-top: 1rem;
-            margin-left: auto;
+            width: 85%;
+            max-width: 900px;
+            margin: 1rem auto 0;
         }
-
 
         button#run {
             width: 120px;
@@ -65,19 +36,19 @@
 
 <body class="subpage">
 
-    <!-- Header vacío -->
-    <header></header>
+    <header></header> <!-- Menu dinámico generado por main.js -->
 
     <main class="wrap section">
         <h2 class="typewriter">Let's code</h2>
         <p class="typewriter desc">Write and run KATO code directly in your browser!</p>
 
-        <div class="btn-container">
-            <button id="run" class="btn secondary" disabled>Run</button>
+        <div class="editor-wrapper">
+            <div class="btn-container">
+                <button id="run" class="btn secondary" disabled>Run</button>
+            </div>
+            <div id="editor" contenteditable="true" spellcheck="false" class="editor"></div>
+            <pre id="output"></pre>
         </div>
-
-        <div id="editor" contenteditable="true" spellcheck="false" class="editor"></div>
-        <pre id="output">Loading environment...</pre>
     </main>
 
     <script>
@@ -88,7 +59,6 @@
             document.getElementById("run").disabled = false;
             document.getElementById("output").textContent = " * Pyodide loaded.";
         }
-
         init();
 
         function transpile(code) {
@@ -99,23 +69,16 @@
                 const indent = Math.floor(leadingSpaces / 4);
                 line = line.trim();
 
-                // Reemplazo de print
                 line = line.replace(/print\s+"([^"]+)"/g, 'print("$1")');
-
-                // Agregar ":" automáticamente a if, elif, else, while, for, def, class
                 line = line.replace(/^(if .*|elif .*|else|while .*|for .*|def .*|class .*?)$/, '$1:');
-
-                // Reemplazo de new
                 line = line.replace(/\bnew\s+([A-Z]\w*)\b/g, '$1()');
 
-                // Convertir llamadas tipo objeto.metodo
                 if (/^[a-z_]\w*\.[a-z_]\w*$/.test(line)) line = line + "()";
 
                 result.push("    ".repeat(indent) + line);
             }
             return result.join("\n");
         }
-
 
         document.getElementById("run").onclick = async () => {
             const editor = document.getElementById("editor");
