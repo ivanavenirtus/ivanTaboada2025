@@ -1,12 +1,11 @@
-/* =========================
-   VARIABLES Y FUENTES
-========================= */
+/* === FUENTES === */
 @font-face {
   font-family: 'SuperRetro';
   src: url('../assets/fonts/SuperRetroM54.ttf') format('truetype');
   font-display: swap;
 }
 
+/* === VARIABLES === */
 :root {
   --bg: #ff4d91;
   --fg: #fff;
@@ -16,47 +15,86 @@
   --gap: 1.125rem;
   --max-w: 1100px;
   --text: clamp(0.9rem, 2.2vw, 1rem);
+  --img-scale: 2.8;
+  --img-shift: 16%;
 }
 
-/* =========================
-   RESET Y BODY
-========================= */
+/* === BODY === */
 html,
+
 body {
   height: 100%;
   margin: 0;
   padding: 0;
+  color: var(--fg);
   font-family: 'Inter', system-ui, Segoe UI, Roboto, sans-serif;
-  color: #fff;
   overflow-x: hidden;
-
-  /* Fondo degradado animado */
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   background: linear-gradient(270deg, #ff4d91, #ff0095, #ff4800, #ff85b3);
   background-size: 800% 800%;
   animation: gradientMove 55s ease infinite;
 }
 
+.editor {
+  background-color: #000;
+  color: #ff00a0;
+  font-size: 1.2rem;
+  padding: 1rem;
+  width: 70%;
+  max-width: 700px;
+  height: 40vh;
+  min-height: 200px;
+  max-height: 500px;
+  box-sizing: border-box;
+  border: none;
+  font-family: monospace;
+  white-space: pre;
+  overflow-y: auto;
+  outline: none;
+}
+
+.error-line {
+  text-decoration: underline;
+  text-decoration-color: red;
+  text-decoration-thickness: 2px;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
 @keyframes gradientMove {
-  0% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
 
   50% {
     background-position: 100% 50%;
   }
-
-  100% {
-    background-position: 0% 50%;
-  }
 }
 
+/* === TEXTOS === */
 p.typewriter.desc {
   font-family: 'Courier New', monospace;
-  font-size: 1.05rem;
+  font-size: 1.3rem;
   line-height: 1.6;
   margin-top: 1rem;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+
+/* ESPACIO DE DESCRIPCIÓN ESTÁTICO*/
+.typewriter.desc {
+  display: inline-block;
+  overflow: hidden;
+  white-space: normal;
+  min-height: 4.5em;
 }
 
 p.typewriter.desc.visible {
@@ -67,80 +105,67 @@ p.typewriter.desc.visible {
   text-align: justify;
   line-height: 1.6;
   max-width: 600px;
-  /* opcional */
   font-size: 1.1rem;
-  /* aumenta este valor según lo necesites */
 }
 
-/* =========================
-   BOTONES
-========================= */
-
-/* BOTONES PRINCIPALES */
+/* === BOTONES === */
 .btn {
   font-family: 'Courier New', monospace;
-  /* igual que el typewriter */
-  background: rgba(0, 0, 0, 0.6);
-  /* negro opaco */
-  color: #fff;
-  /* texto blanco */
+  background: rgba(0, 0, 0, 0.705);
+  color: var(--fg);
   border-radius: 0;
-  /* sin bordes redondeados */
   font-weight: 700;
   font-size: 1.1rem;
-  /* un poco más grande */
   text-decoration: none;
-  /* quitar subrayado */
   padding: 12px 20px;
-  /* más grande por dentro */
   transition: background 0.3s ease, transform 0.18s ease;
+  position: relative;
+  z-index: 1;
 }
+
+.btn-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 90%;
+  max-width: 800px;
+  margin-top: 1rem;
+}
+
+button#run {
+  width: 120px;
+  /* ancho del botón */
+  font-size: 1.2rem;
+  padding: 0.8rem 1.5rem;
+}
+
 
 .btn:hover {
   background: rgba(0, 0, 0, 0.8);
-  /* más oscuro al hover */
-  transform: translateY(-1px);
-}
-
-/* BOTONES SECUNDARIOS */
-.btn.secondary {
-  font-family: 'Courier New', monospace;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-weight: 600;
-  font-size: 1.1rem;
-  text-decoration: none;
-  padding: 12px 20px;
-}
-
-.btn.secondary:hover {
-  background: rgba(0, 0, 0, 0.7);
-  transform: translateY(-1px);
-}
-
-.btn span,
-.btn {
-  position: relative;
-  z-index: 1;
 }
 
 .btn:active {
   transform: translateY(1px);
 }
 
-/* =========================
-   LAYOUT GENERAL
-========================= */
+/* Botón secundario */
+.btn.secondary {
+  background: rgba(0, 0, 0, 0.712);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.btn.secondary:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* === LAYOUT === */
 .wrap {
   max-width: var(--max-w);
   margin: 0 auto;
   padding: 1rem;
 }
 
-/* =========================
-   HEADER / NAV
-========================= */
+/* === HEADER === */
 header {
   position: fixed;
   top: 0;
@@ -191,7 +216,6 @@ header.hide {
 }
 
 .brand-text p {
-  font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   color: var(--muted);
 }
@@ -245,54 +269,41 @@ header.hide {
   width: 30px;
   height: 22px;
   cursor: pointer;
-  z-index: 999;
   margin-left: auto;
-  align-self: center;
 }
 
 .hamburger span {
-  display: block;
   height: 3px;
   background: var(--fg);
   border-radius: 2px;
   transition: all 0.3s ease;
 }
 
-/* =========================
-   HERO
-========================= */
+/* === HERO === */
 .hero {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
   min-height: 80vh;
-  overflow: visible;
   padding-top: 13rem;
-  ;
 }
 
 .hero-left {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  text-align: left;
   gap: 1rem;
+  align-items: flex-start;
   margin-top: 3rem;
-  z-index: 2;
   position: relative;
-
+  z-index: 2;
 }
 
 .hero-right {
-  flex: 0 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
   transform: scale(var(--img-scale)) translateX(var(--img-shift));
-  transform-origin: center right;
   transition: transform 0.3s ease;
   overflow: visible;
   z-index: 1;
@@ -303,112 +314,56 @@ body.subpage main {
   padding-top: 10rem;
 }
 
-:root {
-  --img-scale: 2.8;
-  --img-shift: 46%;
-}
-
 .profile-photo img {
   width: 100%;
+  max-width: 420px;
   height: auto;
   aspect-ratio: 4 / 5;
   object-fit: contain;
-  object-position: center;
   border-radius: 8px;
-  max-width: 420px;
   transition: transform 0.3s ease;
 }
 
-/* =========================
-   TYPEWRITER
-========================= */
+/* === TYPEWRITER === */
 .typewriter {
   font-family: 'Courier New', monospace;
   display: block;
   white-space: pre-wrap;
   overflow: hidden;
   min-width: 20ch;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.typewriter.visible {
-  opacity: 1;
 }
 
 h1.typewriter {
   font-weight: 300;
   font-size: 2rem;
   margin: 0;
-  min-height: 2.4rem;
   line-height: 2.4rem;
-  display: block;
-  white-space: pre-wrap;
-  overflow: hidden;
 }
 
 h2.typewriter {
-    font-family: 'Courier New', monospace;
-    font-weight: 700;
-    font-size: 2rem;
-    white-space: nowrap;
-    overflow: hidden;
-    width: 0; /* empieza invisible */
-    animation: typing 2s steps(18, end) forwards; /* 17 = "Ask me anything!" */
+  font-weight: 700;
+  font-size: 2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  width: auto;
+  animation: none;
 }
 
 @keyframes typing {
-  from { width: 0; }
-  to { width: 100%; }
-}
-
-@keyframes blink {
-
-  0%,
-  50% {
-    opacity: 1;
+  from {
+    width: 0;
   }
 
-  50.01%,
-  100% {
-    opacity: 0;
+  to {
+    width: 100%;
   }
 }
 
-.name {
-  color: #ffffff;
-  font-weight: 700;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-}
-
-@media (max-width: 980px) {
-  .hero {
-    padding-top: 16rem;
-  }
-
-  .hero-left {
-    margin-top: 3rem;
-    z-index: 2;
-    position: relative;
-  }
-
-  .hero-right {
-    z-index: 1;
-    margin-bottom: 1rem;
-  }
-
-  .section {
-    padding-bottom: 3rem;
-  }
-}
-
-/* =========================
-   PROJECT CARDS
-========================= */
+/* === CARDS === */
 .grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(1, 1fr);
+  grid-template-columns: 1fr;
 }
 
 .card {
@@ -431,13 +386,10 @@ h2.typewriter {
 .thumb {
   width: 100%;
   max-width: 180px;
-  height: auto;
   aspect-ratio: 4/3;
-  flex-shrink: 0;
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
   display: grid;
   place-items: center;
-  color: var(--bg);
   font-weight: 800;
   font-size: 0.9rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -448,115 +400,111 @@ h2.typewriter {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* =========================
-   RESPONSIVE HERO Y GRID
-========================= */
-@media (max-width: 760px) {
+/* === CTA ROW === */
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: flex-start;
+}
+
+.cta-row .btn {
+  display: inline-flex;
+  justify-content: center;
+  min-width: max-content;
+}
+
+/* === RESPONSIVE === */
+@media (min-width: 1200px) {
+
+  #editor,
+  #output {
+    width: 1200px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 980px) {
   :root {
     --img-scale: 2.8;
-    /* ligeramente más grande */
     --img-shift: 0%;
-    /* centrada */
   }
 
   .hero {
+    padding-top: 13rem;
     flex-direction: column-reverse;
     align-items: center;
-    justify-content: center;
-    padding-top: 13rem;
   }
 
   .hero-right {
-    transform: scale(var(--img-scale)) translateX(var(--img-shift));
-    transform-origin: center center;
-    margin: 0 auto;
     max-width: 200px;
-    z-index: 1;
-    margin-bottom: 1rem;
+    margin: 0 auto 1rem;
   }
 
   .hero-left {
-    margin-top: 3rem;
-    /* separa el texto de la imagen */
-    z-index: 2;
-    position: relative;
     align-items: center;
     text-align: center;
   }
 
   h1.typewriter {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 
   h2.typewriter {
-    font-size: 1.8rem;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .card {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    gap: 0.75rem;
-  }
-
-  .thumb {
-    width: 100%;
-    height: auto;
-    max-height: 150px;
-  }
-
-  .cta-row {
-    justify-content: center;
-  }
-
-  .cta-row .btn {
-    flex: 1 1 auto;
-    /* se adaptan a la fila */
+    font-size: 1.6rem;
   }
 }
 
-/* =========================
-   MOBILE / PANTALLAS MUY PEQUEÑAS
-========================= */
-@media (max-width: 530px) {
+@media (max-width: 760px) {
+  :root {
+    --img-scale: 2.8;
+    --img-shift: 0%;
+  }
 
+  .hero {
+    flex-direction: column-reverse;
+    align-items: center;
+    padding-top: 13rem;
+  }
+
+  .hero-right {
+    max-width: 200px;
+    margin: 0 auto 1rem;
+  }
+
+  .hero-left {
+    align-items: center;
+    text-align: center;
+  }
+
+  h1.typewriter {
+    font-size: 1.4rem;
+  }
+
+  h2.typewriter {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 630px) {
   :root {
     --img-scale: 2.6;
     --img-shift: 0%;
   }
 
   .hero {
-    flex-direction: column-reverse;
-    align-items: center;
-    justify-content: center;
     padding-top: 12rem;
-  }
-
-  .hero-left {
-    margin-top: 3rem;
-    z-index: 2;
-    position: relative;
-  }
-
-  .hero-right {
-    z-index: 1;
   }
 
   .nav-links {
     display: none;
     flex-direction: column;
-    align-items: center;
     width: 100%;
     background: rgba(0, 0, 0, 0.7);
     position: absolute;
     top: 100%;
     left: 0;
-    padding: 0;
-    margin: 0;
   }
 
   .nav-links.active {
@@ -567,7 +515,6 @@ h2.typewriter {
     padding: 12px 0;
     width: 100%;
     text-align: center;
-    border-bottom: none;
   }
 
   .nav-links a::after {
@@ -576,63 +523,13 @@ h2.typewriter {
 
   .hamburger {
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
     width: 25px;
     height: 20px;
-    cursor: pointer;
     transform: translateX(-10px);
-    /* desplazamiento a la izquierda */
-    z-index: 1000;
   }
 
   .hamburger span {
-    display: block;
     height: 2px;
-    background: var(--fg);
     border-radius: 1px;
-    transition: all 0.3s ease;
   }
-}
-
-/* =========================
-   CTA ROW (BOTONES IGUAL ANCHO)
-========================= */
-.cta-row {
-  display: flex;
-  flex-wrap: wrap;
-  /* permite reacomodo de botones */
-  gap: 1rem;
-  margin-top: 1.5rem;
-  justify-content: flex-start;
-}
-
-.cta-row .btn {
-  display: inline-flex;
-  justify-content: center;
-  min-width: max-content;
-  /* ancho mínimo basado en el contenido más largo */
-}
-
-/* === OCULTAR SCROLLBAR === */
-html,
-body {
-  overflow-y: scroll;
-  /* mantener scroll funcional */
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE/Edge antiguos */
-}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, Opera */
-}
-
-/* Prevenir side-scroll y pequeños desbordes */
-html,
-body {
-  overflow-x: hidden;
 }

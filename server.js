@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 
-// Importa funciones locales
+//IMPORTAR RESPUESTAS LOCALES
 import { getLocalResponse } from "./api/localResponses.js";
 
 dotenv.config();
@@ -14,12 +14,12 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const app = express();
 app.use(express.json());
 
-// Configurar carpeta pública para frontend
+//CONFIGURAR RUTA PARA ARCHIVOS ESTÁTICOS
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "public"))); // <--- mueve tu HTML/CSS/JS a /public
 
-// Endpoint del chatbot
+//ENDPOINT PARA EL CHAT
 app.post("/api/chat", async (req, res) => {
     try {
         const userMessage = req.body.message || "";
@@ -28,11 +28,11 @@ app.post("/api/chat", async (req, res) => {
             return res.status(401).json({ error: "Token no encontrado" });
         }
 
-        // Respuesta local primero
+        //RESPUESTA LOCAL
         const localResponse = await getLocalResponse(userMessage);
         if (localResponse) return res.json({ text: localResponse });
 
-        // Petición a OpenAI si no hay respuesta local
+        //LLAMADA A OPENAI
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -50,7 +50,7 @@ app.post("/api/chat", async (req, res) => {
         });
 
         if (!response.ok) {
-            console.error("❌ Error HTTP:", response.status, await response.text());
+            console.error("Error HTTP:", response.status, await response.text());
             return res.status(500).json({ error: "Error al conectar con OpenAI" });
         }
 
@@ -59,11 +59,11 @@ app.post("/api/chat", async (req, res) => {
         res.json({ text });
 
     } catch (error) {
-        console.error("💥 Error interno:", error);
+        console.error("Error interno:", error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
 });
 
-// En Vercel usar process.env.PORT o 3000 localmente
+//INICIAR SERVIDOR
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));

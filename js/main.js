@@ -1,16 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
   const header = document.querySelector("header");
 
-  // ===== CREAR NAV DINÁMICO =====
+  //CR
   let navWrap = header.querySelector(".wrap.nav");
   if (!navWrap) {
     navWrap = document.createElement("div");
     navWrap.classList.add("wrap", "nav");
 
-    // ===== Detectar si estamos dentro de pages/ =====
     const inPages = window.location.pathname.includes("/pages/");
 
-    // Ajustar rutas según ubicación
+    //ENRUTAR LINKS
     const indexLink = inPages ? "../index.html" : "index.html";
     const proyectosLink = inPages ? "proyectos.html" : "pages/proyectos.html";
     const acercaLink = inPages ? "acerca.html" : "pages/acerca.html";
@@ -35,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const navLinks = navWrap.querySelector(".nav-links");
 
-  // ===== BOTÓN HAMBURGUESA =====
+  //BOTÓN HAMBURGUESA
   let hamburger = navWrap.querySelector(".hamburger");
   if (!hamburger) {
     hamburger = document.createElement("div");
@@ -52,13 +51,13 @@ document.addEventListener("DOMContentLoaded", () => {
     link.addEventListener("click", () => navLinks.classList.remove("active"));
   });
 
-  // ===== RESALTAR LINK ACTIVO =====
+  //RESALTAR LINK ACTIVO
   const currentPage = window.location.pathname.split("/").pop();
   navLinks.querySelectorAll("a").forEach(link => {
     if (link.getAttribute("href").includes(currentPage)) link.classList.add("active");
   });
 
-  // ===== LOOP H1 (IDIOMAS) =====
+  //LOOP IDIOMAS H1
   class TypeWriterLoop {
     constructor(element, texts, speed = 80, pause = 1500) {
       this.element = element;
@@ -112,11 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ]);
   }
 
-  // ===== TYPEWRITER H2 + P con cursor en H2 =====
+  //TYPEWRITER H2 + P
   class TypeWriter {
     constructor(element, text, speed = 100, callback = null) {
       this.element = element;
-      this.text = text.replace(/\s+/g, " ");
+      this.text = text;
       this.speed = speed;
       this.index = 0;
       this.callback = callback;
@@ -124,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.element.classList.add("visible");
       this.type();
     }
-
     type() {
       if (this.index < this.text.length) {
         this.element.textContent += this.text[this.index];
@@ -140,17 +138,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const descEl = document.querySelector("p.typewriter.desc");
 
   if (nameEl && descEl) {
-    const nameText = nameEl.textContent;
-    const descText = descEl.textContent;
+    const nameText = nameEl.textContent;   // texto del h2
+    const descText = descEl.textContent;   // texto del párrafo
 
     new TypeWriter(nameEl, nameText, 100, () => {
+      // callback cuando termine el h2
       descEl.textContent = "";
       descEl.classList.add("visible");
-      new TypeWriter(descEl, descText, 50);
+      new TypeWriter(descEl, descText, 50); // typewriter del párrafo
     });
   }
 
-  // ===== NAVBAR OCULTAR/SHRINK AL SCROLL =====
+
+  //NAVBAR OCULTAR/SHRINK AL SCROLL
   let lastScroll = 0;
   window.addEventListener("scroll", () => {
     const currentScroll = window.scrollY;

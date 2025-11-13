@@ -2,7 +2,7 @@ const form = document.querySelector("#chat-form");
 const input = document.querySelector("#user-input");
 const chatBox = document.querySelector("#chat-box");
 
-// Función para detectar si el mensaje habla de clima
+//DETECTAR SI LA PETICION DEL USUARIO ES SOBRE EL CLIMA O TEMPERATURA
 function normalizeWeatherMessage(message) {
   const lower = message.toLowerCase();
   if (
@@ -11,14 +11,13 @@ function normalizeWeatherMessage(message) {
     lower.includes("weather") ||
     lower.includes("temperature")
   ) {
-    // Devuelve mensaje estándar según idioma
-    if (lower.match(/[a-z]/)) { // si hay letras inglesas
+    if (lower.match(/[a-z]/)) { 
       return "the weather";
     } else {
       return "la temperatura";
     }
   }
-  return message; // si no, devuelve el mensaje original
+  return message;
 }
 
 form.addEventListener("submit", async (e) => {
@@ -26,10 +25,9 @@ form.addEventListener("submit", async (e) => {
   let message = input.value.trim();
   if (!message) return;
 
-  // Normalizamos el mensaje si habla de clima
   message = normalizeWeatherMessage(message);
 
-  addMessage("user", input.value.trim()); // mostramos el mensaje original
+  addMessage("user", input.value.trim()); 
   input.value = "";
 
   try {
@@ -40,12 +38,12 @@ form.addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
-    console.log("📩 Respuesta del servidor:", data.text || data.error);
+    console.log("Respuesta del servidor:", data.text || data.error);
 
-    addMessage("bot", data.text || data.error || "No tengo respuesta 😅");
+    addMessage("bot", data.text || data.error || "No tengo respuesta");
   } catch (err) {
-    console.error("❌ Error al enviar mensaje:", err);
-    addMessage("bot", "Ocurrió un error al enviar tu mensaje 😅");
+    console.error("Error al enviar mensaje:", err);
+    addMessage("bot", "Ocurrió un error al enviar tu mensaje");
   }
 });
 

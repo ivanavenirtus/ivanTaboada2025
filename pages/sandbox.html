@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KATO Sandbox</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="../assets/icons/logo.png" type="image/png" sizes="24x24">
+    <link rel="apple-touch-icon" href="../assets/icons/logo.png" sizes="180x180">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+    <script src="../js/main.js" defer></script>
+    <style>
+        /* Editor */
+        #editor {
+            background-color: #00000093;
+            color: #ff4c82;
+            font-family: monospace;
+            font-size: 1.2rem;
+            padding: 1rem;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: none;
+            resize: vertical;
+        }
+
+        /* Output */
+        #output {
+            background-color: #00000093;
+            color: #ff4c82;
+            font-size: 1.3rem;
+            padding: 1rem;
+            min-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            box-sizing: border-box;
+        }
+
+        /* Botón a la derecha */
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 1rem;
+            margin-left: auto;
+        }
+
+
+        button#run {
+            width: 120px;
+            text-align: center;
+            font-size: 1.2rem;
+            padding: 0.8rem 1.5rem;
+            margin: 0;
+        }
+
+        .error-line {
+            background-color: rgba(255, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body class="subpage">
+
+    <!-- Header vacío -->
+    <header></header>
+
+    <main class="wrap section">
+        <h2 class="typewriter">Let's code</h2>
+        <p class="typewriter desc">Write and run KATO code directly in your browser!</p>
+
+        <div class="btn-container">
+            <button id="run" class="btn secondary" disabled>Run</button>
+        </div>
+
+        <div id="editor" contenteditable="true" spellcheck="false" class="editor"></div>
+        <pre id="output">Loading environment...</pre>
+    </main>
+
+    <script>
+        let pyodide;
+
+        async function init() {
+            pyodide = await loadPyodide();
+            document.getElementById("run").disabled = false;
+            document.getElementById("output").textContent = " * Pyodide loaded.";
+        }
+
+        init();
+
+        function transpile(code) {
+            const lines = code.split(/\r?\n/);
+            const result = [];
+            for (let line of lines) {
+                const leadingSpaces = line.match(/^\s*/)[0].length;
+                const indent = Math.floor(leadingSpaces / 4);
+                line = line.trim();
+
+                // Reemplazo de print
+                line = line.replace(/print\s+"([^"]+)"/g, 'print("$1")');
+
+                // Agregar ":" automáticamente a if, elif, else, while, for, def, class
+                line = line.replace(/^(if .*|elif .*|else|while .*|for .*|def .*|class .*?)$/, '$1:');
+
+                // Reemplazo de new
+                line = line.replace(/\bnew\s+([A-Z]\w*)\b/g, '$1()');
+
+                // Convertir llamadas tipo objeto.metodo
+                if (/^[a-z_]\w*\.[a-z_]\w*$/.test(line)) line = line + "()";
+
+                result.push("    ".repeat(indent) + line);
+            }
+            return result.join("\n");
+        }
+
+
+        document.getElementById("run").onclick = async () => {
+            const editor = document.getElementById("editor");
+            const src = editor.innerText;
+            const pythonCode = transpile(src);
+            const out = document.getElementById("output");
+            out.textContent = "";
+
+            function highlightError(lineNumber) {
+                const lines = editor.innerText.split("\n");
+                const correctedLine = lineNumber - 1;
+                editor.innerHTML = lines.map((line, idx) => {
+                    if (idx === correctedLine) return `<span class="error-line">${line}</span>`;
+                    return line;
+                }).join("\n");
+            }
+
+            try {
+                await pyodide.runPythonAsync(`import sys, io; sys.stdout = io.StringIO()`);
+                await pyodide.runPythonAsync(pythonCode);
+                const result = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+                out.textContent = result.trim() || "No output.";
+            } catch (err) {
+                const match = err.toString().match(/File "<exec>", line (\d+)/);
+                if (match) highlightError(parseInt(match[1]));
+                out.textContent = "X Error de sintaxis:\n" + err;
+            }
+        };
+
+        // Soporte de tabulación
+        const editor = document.getElementById("editor");
+        editor.addEventListener("keydown", function (e) {
+            if (e.key === "Tab") {
+                e.preventDefault();
+                const sel = window.getSelection();
+                const range = sel.getRangeAt(0);
+                const tabNode = document.createTextNode("    ");
+                range.insertNode(tabNode);
+                range.setStartAfter(tabNode);
+                range.setEndAfter(tabNode);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        });
+    </script>
+
+</body>
+
+</html>
