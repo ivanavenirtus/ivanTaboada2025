@@ -146,7 +146,6 @@ p.typewriter.desc {
   transition: opacity 0.3s ease;
 }
 
-/* ESPACIO DE DESCRIPCIÓN ESTÁTICO*/
 .typewriter.desc {
   display: inline-block;
   overflow: hidden;
@@ -161,7 +160,7 @@ p.typewriter.desc.visible {
 .desc {
   text-align: justify;
   line-height: 1.6;
-  max-width: 600px;
+  max-width: 630px;
   font-size: 1.1rem;
 }
 
