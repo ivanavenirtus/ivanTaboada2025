@@ -64,7 +64,7 @@ const hobbiesResponses = [
     "Me gusta mezclar música y experimentar con distintos sonidos y efectos.",
     "Programar proyectos personales es una de mis formas favoritas de pasar el tiempo.",
     "Me apasiona la música electrónica y aprender sobre producción musical.",
-    "Exploro videojuegos retro porque me encanta la nostalgia y la historia de los juegos."
+    "Me gustan los juegos retro... bueno de hace 10 años, por la nostalgia"
 ];
 
 // Normalizar mensaje
