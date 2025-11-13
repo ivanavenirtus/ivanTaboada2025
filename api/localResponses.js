@@ -96,6 +96,44 @@ export const dateKeywords = [
     "current date"
 ];
 
+// Keywords hobbies / gustos
+export const hobbiesKeywords = [
+    // Español
+    "qué te gusta hacer",
+    "cuáles son tus hobbies",
+    "qué haces en tu tiempo libre",
+    "qué te gusta",
+    "qué te entretiene",
+    "cómo pasas tu tiempo libre",
+    "qué actividades disfrutas",
+    "qué haces para divertirte",
+    "tienes algún hobby",
+    "qué hobbies tienes",
+    "qué haces cuando estás libre",
+    "qué te apasiona",
+    "qué te interesa hacer",
+    "qué te gusta hacer en tu tiempo libre",
+    "qué aficiones tienes",
+
+    // Inglés
+    "what do you like to do",
+    "what are your hobbies",
+    "what do you do in your free time",
+    "what do you enjoy",
+    "how do you spend your free time",
+    "what activities do you like",
+    "what do you do for fun",
+    "do you have any hobbies",
+    "what hobbies do you have",
+    "what do you like doing",
+    "what interests you",
+    "what are you passionate about",
+    "what do you enjoy doing",
+    "what do you like to do in your free time",
+    "what are your favorite activities"
+];
+
+
 // Normalizar mensaje: quitar ¿, ?, espacios y pasar a minúsculas
 function normalizeMessage(message) {
     return message
@@ -140,6 +178,10 @@ export async function getLocalResponse(userMessage) {
     );
     const isWeather = weatherKeywords.some(keyword =>
         new RegExp(`\\b${normalizeMessage(keyword)}\\b`).test(normalizedMessage)
+    );
+
+    const isHobby = hobbiesKeywords.some(keyword =>
+        normalizedMessage.includes(normalizeMessage(keyword))
     );
 
     let respuesta = null;
@@ -192,38 +234,59 @@ export async function getLocalResponse(userMessage) {
             `La hora actual es ${formattedTime}`;
     }
 
-    // Respuestas de clima
-    if (isWeather) {
-        try {
-            const apiKey = process.env.OPENWEATHER_API_KEY;
-            const city = extractCity(userMessage);
-            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=${lang}`;
+    if (isHobby) {
+        export const hobbiesResponses = [
+            "Me encanta crear música, ¡especialmente trap y rock!",
+            "Disfruto mucho jugar videojuegos, sobre todo los de estrategia y narrativa.",
+            "Me apasiona el arte, la música y la tecnología.",
+            "Programar es uno de mis pasatiempos favoritos, siempre me gusta aprender cosas nuevas.",
+            "Me gusta tocar instrumentos y componer canciones cuando tengo tiempo libre.",
+            "Exploro videojuegos indie porque me encanta descubrir nuevas experiencias.",
+            "Pinto y dibujo en mis ratos libres, es una forma de expresarme.",
+            "Siempre estoy aprendiendo nuevas tecnologías y practicando programación.",
+            "Me encanta asistir a conciertos y descubrir música nueva de distintos géneros.",
+            "Juego videojuegos online con amigos, especialmente juegos de aventura y rol.",
+            "Disfruto mucho diseñar y crear arte digital en mi tiempo libre.",
+            "Me gusta mezclar música y experimentar con distintos sonidos y efectos.",
+            "Programar proyectos personales es una de mis formas favoritas de pasar el tiempo.",
+            "Me apasiona la música electrónica y aprender sobre producción musical.",
+            "Exploro videojuegos retro porque me encanta la nostalgia y la historia de los juegos."
+        ];
 
-            const weatherRes = await fetch(url);
-            const data = await weatherRes.json();
+        respuesta = respuestasHobbies[Math.floor(Math.random() * respuestasHobbies.length)];
 
-            if (data?.main?.temp != null) {
-                const temp = Math.round(data.main.temp);
-                respuesta = lang === "en" ?
-                    `The current temperature in ${city} is ${temp}°C` :
-                    `La temperatura actual en ${city} es ${temp}°C`;
-            } else {
+        // Respuestas de clima
+        if (isWeather) {
+            try {
+                const apiKey = process.env.OPENWEATHER_API_KEY;
+                const city = extractCity(userMessage);
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=${lang}`;
+
+                const weatherRes = await fetch(url);
+                const data = await weatherRes.json();
+
+                if (data?.main?.temp != null) {
+                    const temp = Math.round(data.main.temp);
+                    respuesta = lang === "en" ?
+                        `The current temperature in ${city} is ${temp}°C` :
+                        `La temperatura actual en ${city} es ${temp}°C`;
+                } else {
+                    respuesta = lang === "en" ?
+                        "I couldn't get the temperature" :
+                        "No pude obtener la temperatura";
+                }
+            } catch (err) {
+                console.error("Error obteniendo el clima:", err);
                 respuesta = lang === "en" ?
                     "I couldn't get the temperature" :
                     "No pude obtener la temperatura";
             }
-        } catch (err) {
-            console.error("Error obteniendo el clima:", err);
-            respuesta = lang === "en" ?
-                "I couldn't get the temperature" :
-                "No pude obtener la temperatura";
         }
-    }
 
-    // Delay aleatorio si hay respuesta local
-    if (respuesta) {
-        await sleep(1000 + Math.random() * 1000); // delay 1-2s
-    }
+        // Delay aleatorio si hay respuesta local
+        if (respuesta) {
+            await sleep(1000 + Math.random() * 1000); // delay 1-2s
+        }
 
-    return respuesta;
-}
+        return respuesta;
+    }
