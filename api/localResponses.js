@@ -290,3 +290,4 @@ export async function getLocalResponse(userMessage) {
 
         return respuesta;
     }
+}
