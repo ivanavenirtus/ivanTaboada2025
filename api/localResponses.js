@@ -235,7 +235,7 @@ export async function getLocalResponse(userMessage) {
     }
 
     if (isHobby) {
-        export const hobbiesResponses = [
+        const hobbiesResponses = [
             "Me encanta crear música, ¡especialmente trap y rock!",
             "Disfruto mucho jugar videojuegos, sobre todo los de estrategia y narrativa.",
             "Me apasiona el arte, la música y la tecnología.",
@@ -254,6 +254,7 @@ export async function getLocalResponse(userMessage) {
         ];
 
         respuesta = respuestasHobbies[Math.floor(Math.random() * respuestasHobbies.length)];
+    }
 
         // Respuestas de clima
         if (isWeather) {
@@ -290,4 +291,3 @@ export async function getLocalResponse(userMessage) {
 
         return respuesta;
     }
-}
