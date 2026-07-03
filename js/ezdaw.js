@@ -1,15 +1,11 @@
-/**
- * EZDAW Core - Edición "Background Play"
- * Incluye: Resize de notas, Reset de huella y Audio estable en segundo plano.
- */
 
 let audioCtx = null;
 let isPlaying = false;
 let currentStep = 0;
 let bpm = 140;
 let nextStepTime = 0.0;
-const scheduleAheadTime = 0.1; // Cuánto tiempo miramos hacia el futuro (en segundos)
-let timerID = null; // ID del reloj para segundo plano
+const scheduleAheadTime = 0.1;
+let timerID = null; 
 
 // Variables para el Resize (Estiramiento)
 let isResizing = false;
@@ -162,8 +158,6 @@ function playNote(note, time) {
     const baseFreq = 130.81; 
     const playbackRate = notes[note] / baseFreq;
     source.playbackRate.setValueAtTime(playbackRate, time);
-
-    // FILTRO: Bajamos la Q de 22 a 8 para quitar el "chillido" que distorsiona
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(3500, time);
     filter.Q.setValueAtTime(8, time); 
@@ -171,19 +165,13 @@ function playNote(note, time) {
     const releaseTime = decayValue;
     const totalDuration = noteDuration + releaseTime;
 
-    // ENVOLVENTE: Bajamos la ganancia de 0.7 a 0.4 para evitar el clipping
+
     gain.gain.setValueAtTime(0, time);
-    // Un ataque de 0.01s es lo suficientemente rápido para ser seco pero evita distorsión inicial
     gain.gain.linearRampToValueAtTime(0.4, time + 0.01); 
     gain.gain.setValueAtTime(0.4, time + noteDuration);
-    
-    // Release lineal más controlado
     gain.gain.linearRampToValueAtTime(0.0001, time + totalDuration);
-
     source.connect(filter);
     filter.connect(gain);
-    
-    // OPCIONAL: Conectar a un compresor si lo tienes, o directo al destino
     gain.connect(audioCtx.destination);
 
     source.start(time);
@@ -193,20 +181,17 @@ function playNote(note, time) {
 // --- 6. MOTOR DE TIEMPO (ESTABLE EN SEGUNDO PLANO) ---
 function nextNote() {
     const secondsPerBeat = 60.0 / bpm;
-    nextStepTime += 0.25 * secondsPerBeat; // Avanzar 1/16 de nota
+    nextStepTime += 0.25 * secondsPerBeat; 
     currentStep = (currentStep + 1) % 16;
 }
 
 function scheduleStep(step, time) {
-    // Audio: Se programa en el hardware (no se detiene al salir de la pestaña)
     document.querySelectorAll(`.pad[data-step="${step}"].active`).forEach(p => {
         playSound(parseInt(p.dataset.row), time);
     });
     document.querySelectorAll(`.piano-pad[data-step="${step}"].active`).forEach(p => {
         playNote(p.dataset.note, time);
     });
-
-    // Visual: Se sincroniza mediante un pequeño retraso
     const drawTime = (time - audioCtx.currentTime) * 1000;
     setTimeout(() => {
         if (!isPlaying) return;
@@ -233,7 +218,6 @@ document.getElementById('play-pause').onclick = async function () {
     if (isPlaying) {
         currentStep = 0;
         nextStepTime = audioCtx.currentTime;
-        // Usamos setInterval para que el navegador no lo pause al 100%
         timerID = setInterval(scheduler, 25);
     } else {
         clearInterval(timerID);

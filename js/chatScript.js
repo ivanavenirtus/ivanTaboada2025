@@ -1,49 +1,77 @@
 const form = document.querySelector("#chat-form");
 const input = document.querySelector("#user-input");
 const chatBox = document.querySelector("#chat-box");
+const sendBtn = document.querySelector("#send-btn");
 
-//DETECTAR SI LA PETICION DEL USUARIO ES SOBRE EL CLIMA O TEMPERATURA
+// Selección de los dos videos para evitar el parpadeo del botón nativo
+const avatarIdle = document.querySelector("#avatar-idle");
+const avatarTalking = document.querySelector("#avatar-talking");
+
+let isTyping = false;
+
+// CORRECCIÓN: Detectar el idioma de las palabras clave de forma explícita
 function normalizeWeatherMessage(message) {
   const lower = message.toLowerCase();
-  if (
-    lower.includes("clima") ||
-    lower.includes("temperatura") ||
-    lower.includes("weather") ||
-    lower.includes("temperature")
-  ) {
-    if (lower.match(/[a-z]/)) { 
-      return "the weather";
-    } else {
-      return "la temperatura";
-    }
+  
+  // Palabras clave en inglés
+  if (lower.includes("weather") || lower.includes("temperature")) {
+    return "the weather";
   }
+  
+  // Palabras clave en español
+  if (lower.includes("clima") || lower.includes("temperatura")) {
+    return "la temperatura";
+  }
+  
   return message;
+}
+
+function setAvatarState(talking) {
+  if (talking) {
+    avatarTalking.currentTime = 0;
+    avatarTalking.play().catch(err => console.log("Auto-play mitigado por políticas:", err));
+    
+    avatarTalking.classList.add("active");
+    avatarIdle.classList.remove("active");
+  } else {
+    avatarIdle.classList.add("active");
+    avatarTalking.classList.remove("active");
+    
+    setTimeout(() => {
+      if (!isTyping) avatarTalking.pause();
+    }, 150);
+  }
 }
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  let message = input.value.trim();
-  if (!message) return;
+  const rawMessage = input.value.trim();
+  if (!rawMessage || isTyping) return;
 
-  message = normalizeWeatherMessage(message);
+  // Normalizamos el mensaje para la API interna
+  const processedMessage = normalizeWeatherMessage(rawMessage);
 
-  addMessage("user", input.value.trim()); 
+  // Mostramos en pantalla el texto original que escribió el usuario
+  addMessage("user", rawMessage); 
   input.value = "";
+  if (sendBtn) sendBtn.disabled = true;
 
   try {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message: processedMessage }),
     });
 
     const data = await res.json();
-    console.log("Respuesta del servidor:", data.text || data.error);
+    const botReply = data.text || data.error || "No tengo respuesta.";
 
-    addMessage("bot", data.text || data.error || "No tengo respuesta");
+    // Renderizar la respuesta con el efecto typewriter y el avatar hablando
+    addBotMessageWithVoice(botReply);
+
   } catch (err) {
     console.error("Error al enviar mensaje:", err);
-    addMessage("bot", "Ocurrió un error al enviar tu mensaje");
+    addBotMessageWithVoice("Ocurrió un error al enviar tu mensaje.");
   }
 });
 
@@ -53,4 +81,35 @@ function addMessage(sender, text) {
   div.textContent = `${sender === "user" ? "USER:" : "IVÁN:"} ${text}`;
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function addBotMessageWithVoice(text) {
+  const div = document.createElement("div");
+  div.className = "bot";
+  div.textContent = "IVÁN: ";
+  chatBox.appendChild(div);
+
+  // Activamos el estado de habla en el avatar
+  isTyping = true;
+  setAvatarState(true);
+
+  let index = 0;
+  const speed = 30; 
+
+  function typeWriterEffect() {
+    if (index < text.length) {
+      div.textContent += text[index];
+      index++;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      setTimeout(typeWriterEffect, speed);
+    } else {
+      // Al terminar el texto, regresamos al estado Idle de forma limpia
+      isTyping = false;
+      setAvatarState(false);
+      if (sendBtn) sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  typeWriterEffect();
 }

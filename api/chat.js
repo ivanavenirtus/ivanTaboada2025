@@ -7,15 +7,19 @@ async function getOpenWeatherData(city) {
   if (!apiKey) return null;
 
   try {
+    // Regex mejorada para soportar tildes y eñes en nombres de ciudades
     const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${apiKey}`;
     const geoRes = await fetch(geoUrl);
     const geoData = await geoRes.json();
 
     if (!geoData || geoData.length === 0) return null;
     const { lat, lon, name, state } = geoData[0];
+    
     const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=es&appid=${apiKey}`;
     const weatherRes = await fetch(weatherUrl);
     const weatherData = await weatherRes.json();
+
+    if (!weatherData || !weatherData.main || !weatherData.weather) return null;
 
     return {
       location: `${name}${state ? `, ${state}` : ""}`,
@@ -62,13 +66,15 @@ export default async function handler(req, res) {
     const lowerMsg = userMessage.toLowerCase();
     if (lowerMsg.includes("clima") || lowerMsg.includes("temperatura") || lowerMsg.includes("weather")) {
       let city = "CDMX"; 
-      const match = userMessage.match(/(?:en|de|por)\s+([a-zA-Z\s]+)/i);
+      // Captura ciudades con espacios, tildes o caracteres latinos
+      const match = userMessage.match(/(?:en|de|por)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)/i);
       if (match && match[1]) {
         city = match[1].trim();
       }
 
       const weatherInfo = await getOpenWeatherData(city);
 
+      // Si obtuvimos datos meteorológicos con éxito, responde con el prompt del sistema especializado
       if (weatherInfo) {
         const chatCompletion = await client.chat.completions.create({
           messages: [
@@ -94,6 +100,7 @@ export default async function handler(req, res) {
     }
 
     // --- CONSULTA ESTÁNDAR A GROQ ---
+    // Se ejecuta de manera regular, o como fallback si OpenWeather falló
     const chatCompletion = await client.chat.completions.create({
       messages: [
         { 

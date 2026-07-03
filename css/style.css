@@ -35,17 +35,33 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
   color: var(--fg);
   font-family: 'Inter', system-ui, Segoe UI, Roboto, sans-serif;
   overflow-x: hidden;
-  background: linear-gradient(270deg, #ff4d91, #ff0095, #ff4800, #ff85b3);
-  background-size: 800% 800%;
-  animation: gradientMove 55s ease infinite;
+  background:
+    radial-gradient(ellipse at 12% 22%, rgba(255, 0, 204, 0.22), transparent 20%),
+    radial-gradient(ellipse at 84% 18%, rgba(255, 154, 0, 0.18), transparent 22%),
+    radial-gradient(ellipse at 50% 12%, rgba(255, 0, 102, 0.14), transparent 24%),
+    radial-gradient(ellipse at 28% 76%, rgba(255, 100, 0, 0.12), transparent 26%),
+    radial-gradient(ellipse at 70% 56%, rgba(255, 105, 159, 0.12), transparent 28%),
+    linear-gradient(150deg, #ff0062 0%, #ff6a9f 18%, #ff5100 36%, #ffbe00 52%, #ff389f 70%, #ff0040 100%);
+  background-size: 420% 420%;
+  animation: gradientPulse 48s ease-in-out infinite alternate;
+  min-height: 100vh;
 }
+
+@keyframes gradientPulse {
+  0% { background-position: 15% 45%; }
+  20% { background-position: 35% 55%; }
+  40% { background-position: 55% 43%; }
+  60% { background-position: 72% 52%; }
+  80% { background-position: 90% 47%; }
+  100% { background-position: 15% 45%; }
+}
+
 
 /* ================================================= */
 /* ================= LAYOUT ======================== */
@@ -62,11 +78,11 @@ body {
 /* ================================================= */
 
 header {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   width: 100%;
-  height: var(--header-height);
+  min-height: var(--header-height);
   z-index: 100;
   backdrop-filter: blur(6px);
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
@@ -201,10 +217,15 @@ body:not(.subpage) main.hero {
 /* ================================================= */
 
 body.subpage main {
-  padding-top: calc(var(--header-height) + 6rem);
+  padding: calc(var(--header-height) + 5rem) 2rem 2rem;
   max-width: var(--max-w);
   margin: 0 auto;
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  box-shadow: none;
 }
+
 
 /* ================================================= */
 /* ================= BOTONES ======================= */
@@ -212,19 +233,20 @@ body.subpage main {
 
 .btn {
   font-family: 'Courier New', monospace;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.65);
   color: var(--fg);
   font-weight: 700;
   font-size: 1.05rem;
   padding: 12px 20px;
   text-decoration: none;
-  border: none;
+  border: 1px solid rgba(255,255,255,0.12);
   cursor: pointer;
   transition: all 0.2s ease;
+  border-radius: 0;
 }
 
 .btn:hover {
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.85);
 }
 
 .cta-row {
@@ -270,42 +292,212 @@ p.typewriter.desc {
   display: inline-block;
 }
 
-/* ================================================= */
-/* ================= SANDBOX ======================= */
-/* ================================================= */
+/* ==========================================================================
+   KATO SANDBOX 
+   ========================================================================== */
+
+body.subpage main.section {
+    padding-top: calc(var(--header-height) + 0.5rem);
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--header-height));
+    box-sizing: border-box;
+}
+
+.kato-link {
+    display: inline-block;
+    color: #ff007f; 
+    font-family: 'Courier New', monospace;
+    text-decoration: none;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    transition: opacity 0.2s ease;
+    width: fit-content;
+}
+
+.kato-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.typewriter.main-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 2.2rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.typewriter.desc {
+    margin: 0 0 1.5rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    opacity: 0.85;
+    font-family: 'Courier New', monospace;
+}
 
 .editor-wrapper {
-  display: flex;
-  flex-direction: column;
-  width: 95%;
-  max-width: 1000px;
-  margin: 0 auto;
-  gap: 0.75rem;
-  position: relative;
-  z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-grow: 1;
+    gap: 1rem;
 }
 
-.editor,
-#output {
-  min-height: 260px;
-  max-height: 500px;
-  padding: 1rem;
-  font-family: monospace;
-  font-size: 1.2rem;
-  line-height: 1.5rem;
-  background: rgba(0, 0, 0, 0.8);
-  color: #ff4c82;
-  overflow-y: auto;
-  white-space: pre-wrap;
+.btn-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin: 0;
+}
+
+button#run {
+    width: 120px;
+    font-size: 1.1rem;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button#run:disabled {
+    background-color: #555;
+    color: #aaa;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.editor {
+    width: 100%;
+    min-height: 250px;
+    background-color: #121212;
+    color: #f8f8f2;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    padding: 1.2rem;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+    overflow-y: auto;
+    white-space: pre;
+    outline: none;
+    tab-size: 4;
+}
+
+.editor:focus {
+    border-color: #ff007f; 
+}
+
+pre#output {
+    width: 100%;
+    min-height: 150px;
+    background-color: #0b0b0b;
+    color: #ff007f; 
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    padding: 1.2rem;
+    border: 1px solid #202020;
+    border-radius: 4px;
+    box-sizing: border-box;
+    overflow-x: auto;
+    overflow-y: auto;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.error-line {
+    background-color: rgba(255, 0, 0, 0.25);
+    border-left: 3px solid #ff3333;
+    display: block;
+    width: 100%;
+    padding-left: 2px;
+}
+
+/* ================================================= */
+/* ============= SANDBOX PAGE STYLES ============== */
+/* ================================================= */
+
+body.sandbox main {
+  padding-top: calc(var(--header-height) + 15rem);
+  padding-bottom: 2rem;
+}
+
+body.sandbox .wrap.section {
+  max-width: 980px;
+  width: min(100%, 980px);
+  padding: 2.5rem 2rem 2rem;
+  background: transparent;
   border: none;
-  border-radius: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: none;
 }
 
-.editor:focus,
-#output:focus {
-  outline: 2px solid var(--accent);
-  background: rgba(0, 0, 0, 0.9);
+.kato-link {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  text-decoration: none;
+  color: #fff;
+  border: 1px solid #ff00cc;
+  background: #2a2a2a;
+  padding: 0.55rem 1rem;
+  letter-spacing: 0.08em;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.kato-link:hover {
+  background: #1f1f1f;
+}
+
+.typewriter.main-title {
+  margin: 0 0 0.75rem 0;
+  font-size: clamp(2.25rem, 3vw, 3rem);
+  letter-spacing: 0.12em;
+}
+
+.typewriter.desc {
+  margin: 0 0 1.75rem 0;
+  opacity: 0.88;
+  max-width: 820px;
+  line-height: 1.95;
+  color: #f2f2f2;
+}
+
+.editor-wrapper {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 7, 7, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 24px 60px rgba(0, 0, 0, 0.25);
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+button#run {
+  min-width: 130px;
+  font-size: 1.05rem;
+  padding: 0.9rem 1.5rem;
+  margin: 0;
+  border: 1px solid rgba(255, 0, 204, 0.35);
+  background: rgba(255, 0, 204, 0.18);
+  color: #fff;
+  transition: background 0.2s ease, filter 0.2s ease;
+}
+
+button#run:hover {
+  background: rgba(255, 0, 204, 0.28);
+  filter: brightness(1.12);
+  transform: none;
+}
+
+.error-line {
+  background-color: rgba(255, 0, 0, 0.28);
+  display: block;
 }
 
 /* ================================================= */
@@ -352,9 +544,9 @@ p.typewriter.desc {
     flex-direction: column;
     width: 100%;
     background: rgba(0, 0, 0, 0.9);
-    position: absolute;
-    top: 100%;
-    left: 0;
+    position: relative;
+    top: auto;
+    left: auto;
   }
 
   .nav-links.active {
@@ -369,6 +561,59 @@ p.typewriter.desc {
 
   .hamburger {
     display: flex;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    height: auto;
+    padding: 1rem;
+  }
+
+  body.subpage main,
+  body:not(.subpage) main.hero {
+    padding-top: calc(var(--header-height) + 1rem);
+  }
+}
+
+/* Smaller screens global adjustments */
+@media (max-width: 768px) {
+  .wrap {
+    padding: 1rem 0.85rem;
+  }
+
+  body.subpage main,
+  body:not(.subpage) main.hero {
+    padding: calc(var(--header-height) + 4.5rem) 1rem 1.5rem;
+  }
+
+  body:not(.subpage) main.hero {
+    padding-top: calc(var(--header-height) + 5.5rem);
+  }
+
+  .hero-left,
+  .hero-right {
+    flex: 1 1 100%;
+  }
+
+  .hero-right {
+    margin-top: 2rem;
+    transform: none;
+    justify-content: center;
+  }
+
+  .profile-photo img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .nav {
+    gap: 0.75rem;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
   }
 }
 

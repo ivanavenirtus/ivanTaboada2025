@@ -1,70 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CHATBOT | Iván Taboada</title>
-    <link rel="stylesheet" href="../css/chatStyle.css" />
-    <link rel="stylesheet" href="../css/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot | Iván Taboada</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/chatStyle.css">
     <link rel="icon" href="../assets/icons/logo.png" type="image/png" sizes="24x24">
-    <link rel="apple-touch-icon" href="../assets/icons/logo.png" sizes="180x180">
-
-    <style>
-        .typewriter {
-            font-family: 'Courier New', monospace;
-            display: block;
-            position: relative;
-            overflow: hidden;
-            white-space: pre-wrap;
-        }
-        h2.typewriter {
-            min-height: 2.2rem; 
-        }
-    </style>
+    <script src="../js/main.js" defer></script>
 </head>
 
-<body>
+<body class="subpage">
+
     <header></header>
 
-    <div class="chat-container">
-        <h2 class="typewriter" data-text="Ask me anything!">Ask me anything!</h2>
+    <main class="wrap section">
+        <div class="chat-shell">
+            <h2 class="typewriter chat-title" data-text="Ask me anything!">Ask me anything!</h2>
 
-        <div id="chat-box" class="chat-box"></div>
+            <div class="avatar-container">
+                <img id="avatar-video" class="avatar" src="../assets/media/ivan_idle.gif" alt="Avatar de Iván" />
+            </div>
 
-        <form id="chat-form" class="input-area">
-            <input type="text" id="user-input" placeholder="Escribe un mensaje..." required autocomplete="off" />
-            <button type="submit" id="send-btn" class="btn secondary">Send</button>
-        </form>
-    </div>
+            <div class="chat-container">
+                <!-- HISTORIAL DE CONVERSACIÓN -->
+                <div id="chat-box" class="chat-box"></div>
 
+                <!-- INPUT DE ENVÍO -->
+                <form id="chat-form" class="input-area">
+                    <input type="text" id="user-input" placeholder="Escribe un mensaje..." required autocomplete="off" />
+                    <button type="submit" id="send-btn" class="btn secondary">Send</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- FRONTEND LOGIC INTEGRATION -->
     <script>
-        class TypeWriter {
-            constructor(element, speed = 100) {
-                this.element = element;
-                this.text = element.dataset.text || element.textContent || "";
-                this.speed = speed;
-                this.index = 0;
-                this.element.textContent = "";
-                this.type();
+        const form = document.querySelector("#chat-form");
+        const input = document.querySelector("#user-input");
+        const chatBox = document.querySelector("#chat-box");
+        const sendBtn = document.querySelector("#send-btn");
+        const avatarVideo = document.querySelector("#avatar-video");
+
+        // Rutas físicas de tus recursos multimedia.
+        const VIDEO_IDLE = "../assets/media/ivan_idle.gif";
+        const VIDEO_TALKING = "../assets/media/ivan_talking.gif";
+
+        let isTyping = false;
+
+        function setAvatarState(src, talking) {
+            if (avatarVideo.getAttribute("src") !== src) {
+                avatarVideo.src = src;
             }
 
-            type() {
-                if (this.index < this.text.length) {
-                    this.element.textContent += this.text[this.index];
-                    this.index++;
-                    setTimeout(() => this.type(), this.speed);
-                }
-            }
+            avatarVideo.classList.toggle("talking-ui", talking);
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll(".typewriter").forEach(el => new TypeWriter(el, 100));
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const message = input.value.trim();
+            if (!message || isTyping) return;
+
+            // Añadir mensaje del usuario en pantalla
+            addMessage("user", message);
+            input.value = "";
+            sendBtn.disabled = true;
+
+            try {
+                // Petición POST directa a tu handler de Node.js
+                const res = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message }),
+                });
+
+                const data = await res.json();
+                const botReply = data.text || "No tengo respuesta.";
+
+                // Despachar el renderizado dinámico con máquina de escribir y video activo
+                addBotMessageWithVoice(botReply);
+
+            } catch (err) {
+                console.error("Error al procesar la respuesta del servidor:", err);
+                addBotMessageWithVoice("X Error de enlace: Hubo un problema al conectar con el servidor.");
+            }
         });
+
+        function addMessage(sender, text) {
+            const div = document.createElement("div");
+            div.className = sender;
+            div.textContent = `${sender === "user" ? "USER:" : "IVÁN:"} ${text}`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function addBotMessageWithVoice(text) {
+            const div = document.createElement("div");
+            div.className = "bot";
+            div.textContent = "IVÁN: ";
+            chatBox.appendChild(div);
+
+            // 1. INTERCAMBIO DE VIDEO A MODO "HABLANDO"
+            isTyping = true;
+            setAvatarState(VIDEO_TALKING, true);
+
+            let index = 0;
+            const speed = 30; // Velocidad del efecto Typewriter en ms
+
+            function typeWriterEffect() {
+                if (index < text.length) {
+                    div.textContent += text[index];
+                    index++;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    setTimeout(typeWriterEffect, speed);
+                } else {
+                    // 2. RETORNO DE VIDEO A ESTADO "IDLE" AL CONCLUIR EL TEXTO
+                    setAvatarState(VIDEO_IDLE, false);
+                    isTyping = false;
+                    sendBtn.disabled = false;
+                    input.focus();
+                }
+            }
+
+            typeWriterEffect();
+        }
     </script>
 
-    <script src="../js/main.js" defer></script>
-    <script src="../js/chatScript.js" defer></script>
 </body>
 
 </html>
