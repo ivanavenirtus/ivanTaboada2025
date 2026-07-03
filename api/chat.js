@@ -1,124 +1,170 @@
-import { getLocalResponse } from './localResponses.js';
-import OpenAI from "openai";
+const form = document.querySelector("#chat-form");
+const input = document.querySelector("#user-input");
+const chatBox = document.querySelector("#chat-box");
+const sendBtn = document.querySelector("#send-btn");
 
-// --- FUNCION AUXILIAR OPENWEATHER ---
-async function getOpenWeatherData(city) {
-  const apiKey = process.env.OPENWEATHER_API_KEY;
-  if (!apiKey) return null;
+// Elementos de la solución de doble video tag fijados
+const avatarIdle = document.querySelector("#avatar-idle");
+const avatarTalking = document.querySelector("#avatar-talking");
+const chatTitle = document.querySelector(".chat-title");
 
-  try {
-    // Regex mejorada para soportar tildes y eñes en nombres de ciudades
-    const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${apiKey}`;
-    const geoRes = await fetch(geoUrl);
-    const geoData = await geoRes.json();
+let isTyping = false;
 
-    if (!geoData || geoData.length === 0) return null;
-    const { lat, lon, name, state } = geoData[0];
+// ============================================
+// INICIALIZACIÓN DE VIDEOS (Fuerza Autoplay Definitivo)
+// ============================================
+function initVideos() {
+    if (!avatarIdle) return;
     
-    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=es&appid=${apiKey}`;
-    const weatherRes = await fetch(weatherUrl);
-    const weatherData = await weatherRes.json();
+    avatarIdle.muted = true;
+    
+    // Intento 1: Reproducción automática inmediata
+    avatarIdle.play().catch(err => {
+        console.log("Autoplay bloqueado por el navegador. Esperando interacción del usuario...");
+        
+        // Intento 2: Bypass. En cuanto el usuario mueva el mouse o haga clic, el video arranca.
+        const startVideoOnInteraction = () => {
+            avatarIdle.play().then(() => {
+                // Una vez que arranca con éxito, removemos los listeners para no saturar memoria
+                document.removeEventListener("click", startVideoOnInteraction);
+                document.removeEventListener("keydown", startVideoOnInteraction);
+                document.removeEventListener("touchstart", startVideoOnInteraction);
+            }).catch(e => console.error("Error crítico al reproducir:", e));
+        };
 
-    if (!weatherData || !weatherData.main || !weatherData.weather) return null;
-
-    return {
-      location: `${name}${state ? `, ${state}` : ""}`,
-      temp: Math.round(weatherData.main.temp),
-      description: weatherData.weather[0].description,
-      humidity: weatherData.main.humidity
-    };
-  } catch (err) {
-    console.error("Error en OpenWeather:", err);
-    return null;
-  }
+        document.addEventListener("click", startVideoOnInteraction);
+        document.addEventListener("keydown", startVideoOnInteraction);
+        document.addEventListener("touchstart", startVideoOnInteraction); // Soporte móviles
+    });
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
+// Ejecutar carga del bucle estático inicial
+initVideos();
 
-  const groqApiKey = process.env.GROQ_API_KEY;
-  if (!groqApiKey) {
-    return res.status(500).json({ text: "Error de configuración: Groq API Key no encontrada." });
-  }
+// ============================================
+// ANIMACIÓN TYPEWRITER PARA EL TÍTULO
+// ============================================
+function animateTitle() {
+    if (!chatTitle) return;
+    const text = chatTitle.getAttribute("data-text") || "Ask me anything!";
+    chatTitle.textContent = ""; 
+    
+    let index = 0;
+    const speed = 60; 
 
-  const client = new OpenAI({
-    apiKey: groqApiKey,
-    baseURL: "https://api.groq.com/openai/v1",
-  });
-
-  try {
-    const { message } = req.body;
-    const userMessage = (message || "").trim();
-
-    if (!userMessage) {
-      return res.status(400).json({ text: "Escribe un mensaje para continuar." });
+    function type() {
+        if (index < text.length) {
+            chatTitle.textContent += text[index];
+            index++;
+            setTimeout(type, speed);
+        }
     }
+    type();
+}
 
-    // --- RESPUESTAS LOCALES ---
-    const localResponse = await getLocalResponse(userMessage);
-    if (localResponse) {
-      return res.status(200).json({ text: localResponse });
+animateTitle();
+
+// ============================================
+// DETECTAR/NORMALIZAR CLIMA O TEMPERATURA
+// ============================================
+function normalizeWeatherMessage(message) {
+    const lower = message.toLowerCase();
+    if (lower.includes("weather") || lower.includes("temperature")) {
+        return "the weather";
     }
+    if (lower.includes("clima") || lower.includes("temperatura")) {
+        return "la temperatura";
+    }
+    return message;
+}
 
-    // --- DETECTAR SOLICITUD DE CLIMA ---
-    const lowerMsg = userMessage.toLowerCase();
-    if (lowerMsg.includes("clima") || lowerMsg.includes("temperatura") || lowerMsg.includes("weather")) {
-      let city = "CDMX"; 
-      // Captura ciudades con espacios, tildes o caracteres latinos
-      const match = userMessage.match(/(?:en|de|por)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)/i);
-      if (match && match[1]) {
-        city = match[1].trim();
-      }
+// ============================================
+// CONTROL DE TRANSMISIÓN DE VIDEOS (OPACIDAD)
+// ============================================
+function setAvatarState(talking) {
+    if (talking) {
+        avatarTalking.currentTime = 0;
+        avatarTalking.play().catch(err => console.log("Auto-play mitigado:", err));
+        
+        avatarTalking.classList.add("active");
+        avatarIdle.classList.remove("active");
+    } else {
+        avatarIdle.classList.add("active");
+        avatarTalking.classList.remove("active");
+        
+        avatarIdle.play().catch(err => console.log("Error al reanudar Idle:", err));
+        
+        setTimeout(() => {
+            if (!isTyping) avatarTalking.pause();
+        }, 150);
+    }
+}
 
-      const weatherInfo = await getOpenWeatherData(city);
+// ============================================
+// MANEJO DE ENVÍO DE MENSAJES
+// ============================================
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const rawMessage = input.value.trim();
+    if (!rawMessage || isTyping) return;
 
-      // Si obtuvimos datos meteorológicos con éxito, responde con el prompt del sistema especializado
-      if (weatherInfo) {
-        const chatCompletion = await client.chat.completions.create({
-          messages: [
-            { 
-              role: "system", 
-              content: "Eres un asistente meteorológico amigable. El usuario te ha pedido el clima y el sistema ha obtenido estos datos reales en tiempo real:\n" +
-                       `Ubicación: ${weatherInfo.location}\n` +
-                       `Temperatura: ${weatherInfo.temp}°C\n` +
-                       `Condición: ${weatherInfo.description}\n` +
-                       `Humedad: ${weatherInfo.humidity}%\n\n` +
-                       "Redacta una respuesta breve, natural y conversacional en español usando estos datos."
-            },
-            { role: "user", content: userMessage }
-          ],
-          model: "llama-3.3-70b-versatile",
-          temperature: 0.6, 
-          max_tokens: 150, 
+    const processedMessage = normalizeWeatherMessage(rawMessage);
+
+    addMessage("user", rawMessage);
+    input.value = "";
+    sendBtn.disabled = true;
+
+    try {
+        const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: processedMessage }),
         });
 
-        const aiResponse = chatCompletion.choices[0]?.message?.content;
-        return res.status(200).json({ text: aiResponse });
-      }
+        const data = await res.json();
+        const botReply = data.text || "No tengo respuesta.";
+
+        addBotMessageWithVoice(botReply);
+
+    } catch (err) {
+        console.error("Error al procesar la respuesta del servidor:", err);
+        addBotMessageWithVoice("X Error de enlace: Hubo un problema al conectar con el servidor.");
+    }
+});
+
+function addMessage(sender, text) {
+    const div = document.createElement("div");
+    div.className = sender;
+    div.textContent = `${sender === "user" ? "USER:" : "IVÁN:"} ${text}`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function addBotMessageWithVoice(text) {
+    const div = document.createElement("div");
+    div.className = "bot";
+    div.textContent = "IVÁN: ";
+    chatBox.appendChild(div);
+
+    isTyping = true;
+    setAvatarState(true);
+
+    let index = 0;
+    const speed = 30; 
+
+    function typeWriterEffect() {
+        if (index < text.length) {
+            div.textContent += text[index];
+            index++;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            setTimeout(typeWriterEffect, speed);
+        } else {
+            isTyping = false;
+            setAvatarState(false);
+            sendBtn.disabled = false;
+            input.focus();
+        }
     }
 
-    // --- CONSULTA ESTÁNDAR A GROQ ---
-    // Se ejecuta de manera regular, o como fallback si OpenWeather falló
-    const chatCompletion = await client.chat.completions.create({
-      messages: [
-        { 
-          role: "system", 
-          content: "Eres un asistente inteligente, amable y conciso. Responde en 2 o 3 párrafos cortos." 
-        },
-        { role: "user", content: userMessage }
-      ],
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.6, 
-      max_tokens: 350, 
-    });
-
-    const aiResponse = chatCompletion.choices[0]?.message?.content;
-    return res.status(200).json({ text: aiResponse });
-
-  } catch (error) {
-    console.error("Error detallado:", error);
-    return res.status(500).json({ text: "Hubo un error al procesar tu mensaje." });
-  }
+    typeWriterEffect();
 }
