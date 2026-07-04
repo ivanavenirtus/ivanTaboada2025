@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import fs from "fs";
 
 // --- IMPORTAR RESPUESTAS LOCALES ---
-import { getLocalResponse } from "./api/localResponses.js";
+import { getLocalResponse } from "./localResponses.js";
 
 // --- CARGAR .env.local SI EXISTE ---
 if (fs.existsSync(".env.local")) {
