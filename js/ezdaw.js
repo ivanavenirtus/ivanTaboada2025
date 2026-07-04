@@ -1,4 +1,3 @@
-
 let audioCtx = null;
 let isPlaying = false;
 let currentStep = 0;
@@ -13,7 +12,7 @@ let currentPad = null;
 let startX, startWidth;
 
 const notes = { "C4": 261.63, "B3": 246.94, "A3": 220.00, "G3": 196.00, "F3": 174.61, "E3": 164.81, "D3": 146.83, "C3": 130.81 };
-const noteNames = Object.keys(notes);
+const noteNames = Object.keys(notes).slice(0, 7);
 const audioBuffers = [null, null, null, null];
 const filters = [null, null, null, null];
 const sampleUrls = [
@@ -27,83 +26,132 @@ const sampleUrls = [
 // --- 1. INICIALIZACIÓN DE AUDIO ---
 async function initAudio() {
     if (audioCtx) return;
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    for (let i = 0; i < sampleUrls.length; i++) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+        console.error("Web Audio API no está disponible en este navegador.");
+        alert("Tu navegador no soporta Web Audio API. Prueba con Chrome, Edge o Firefox actualizados.");
+        return;
+    }
+
+    try {
+        audioCtx = new AudioContextClass();
+    } catch (e) {
+        console.error("No se pudo crear el AudioContext:", e);
+        return;
+    }
+
+    const loadResults = await Promise.allSettled(sampleUrls.map(async (url, i) => {
         const filter = audioCtx.createBiquadFilter();
         filter.type = 'lowpass';
         filter.frequency.value = 3000;
         filter.connect(audioCtx.destination);
         filters[i] = filter;
 
-        try {
-            const response = await fetch(sampleUrls[i]);
-            const arrayBuffer = await response.arrayBuffer();
-            audioBuffers[i] = await audioCtx.decodeAudioData(arrayBuffer);
-        } catch (e) { console.error("Error cargando sample:", i); }
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status} al pedir ${url}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        audioBuffers[i] = await audioCtx.decodeAudioData(arrayBuffer);
+    }));
+
+    loadResults.forEach((result, i) => {
+        if (result.status === "rejected") {
+            console.error(`No se pudo cargar el sample #${i} (${sampleUrls[i]}):`, result.reason);
+        }
+    });
+
+    const failedCount = loadResults.filter(r => r.status === "rejected").length;
+    if (failedCount === sampleUrls.length) {
+        alert("No se pudo cargar ningún sample de audio. Revisa las rutas en assets/audio.");
     }
+}
+
+// --- Helper: acceso seguro a elementos del DOM ---
+function getEl(id) {
+    const el = document.getElementById(id);
+    if (!el) console.warn(`ezdaw: no se encontró el elemento #${id} en el DOM.`);
+    return el;
+}
+
+function getNumericValue(id, fallback) {
+    const el = document.getElementById(id);
+    if (!el) return fallback;
+    const val = parseFloat(el.value);
+    return Number.isFinite(val) ? val : fallback;
 }
 
 // --- 2. GENERACIÓN DE GRID DE BATERÍA ---
 const sequencerGrid = document.getElementById('sequencer');
-for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 16; j++) {
-        const pad = document.createElement('button');
-        pad.classList.add('pad');
-        pad.dataset.row = i;
-        pad.dataset.step = j;
-        pad.onmousedown = (e) => {
-            if (e.button === 2) pad.classList.remove('active');
-            else pad.classList.toggle('active');
-        };
-        sequencerGrid.appendChild(pad);
+if (sequencerGrid) {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 16; j++) {
+            const pad = document.createElement('button');
+            pad.type = 'button';
+            pad.classList.add('pad');
+            pad.dataset.row = i;
+            pad.dataset.step = j;
+            pad.onmousedown = (e) => {
+                if (e.button === 2) pad.classList.remove('active');
+                else if (e.button === 0) pad.classList.toggle('active');
+            };
+            sequencerGrid.appendChild(pad);
+        }
     }
+} else {
+    console.warn("ezdaw: no se encontró #sequencer, la grilla de batería no se generó.");
 }
 
 // --- 3. GENERACIÓN DE PIANO ROLL (Con Resizer Invisible y Reset) ---
 const pianoSequencer = document.getElementById('piano-sequencer');
-noteNames.forEach((note, rowIndex) => {
-    for (let j = 0; j < 16; j++) {
-        const pad = document.createElement('div');
-        pad.classList.add('piano-pad');
-        pad.style.left = (j * 100) + "px";
-        pad.style.top = (rowIndex * 30) + "px";
-        pad.style.width = "100px";
-        pad.style.height = "30px";
-        pad.dataset.note = note;
-        pad.dataset.step = j;
+if (pianoSequencer) {
+    noteNames.forEach((note, rowIndex) => {
+        for (let j = 0; j < 16; j++) {
+            const pad = document.createElement('div');
+            pad.classList.add('piano-pad');
+            pad.style.left = (j * 100) + "px";
+            pad.style.top = (rowIndex * 34) + "px";
+            pad.style.width = "100px";
+            pad.style.height = "34px";
+            pad.dataset.note = note;
+            pad.dataset.step = j;
 
-        const resizer = document.createElement('div');
-        resizer.classList.add('resizer');
-        pad.appendChild(resizer);
+            const resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            pad.appendChild(resizer);
 
-        pad.onmousedown = (e) => {
-            if (e.target.classList.contains('resizer')) return;
+            pad.onmousedown = (e) => {
+                if (e.target.classList.contains('resizer')) return;
 
-            if (e.button === 2) {
-                pad.classList.remove('active');
-                pad.style.width = "100px"; // Reset de huella
-            } else {
-                if (pad.classList.contains('active')) {
+                if (e.button === 2) {
                     pad.classList.remove('active');
-                    pad.style.width = "100px"; // Reset al desactivar
-                } else {
-                    pad.classList.add('active');
-                    if (audioCtx) playNote(note, audioCtx.currentTime);
+                    pad.style.width = "100px"; // Reset de huella
+                } else if (e.button === 0) {
+                    if (pad.classList.contains('active')) {
+                        pad.classList.remove('active');
+                        pad.style.width = "100px"; // Reset al desactivar
+                    } else {
+                        pad.classList.add('active');
+                        if (audioCtx) playNote(note, audioCtx.currentTime);
+                    }
                 }
-            }
-        };
-        pianoSequencer.appendChild(pad);
-    }
-});
+            };
+            pianoSequencer.appendChild(pad);
+        }
+    });
+} else {
+    console.warn("ezdaw: no se encontró #piano-sequencer, el piano roll no se generó.");
+}
 
 // --- 4. LÓGICA DE RESIZE (ESTIRAMIENTO) ---
 document.addEventListener('mousedown', e => {
-    if (e.target.classList.contains('resizer')) {
+    if (e.button === 0 && e.target.classList.contains('resizer')) {
         isResizing = true;
         currentPad = e.target.parentElement;
         startX = e.clientX;
-        startWidth = parseInt(window.getComputedStyle(currentPad).width, 10);
+        const computedWidth = parseInt(window.getComputedStyle(currentPad).width, 10);
+        startWidth = Number.isFinite(computedWidth) ? computedWidth : 100;
         document.body.style.cursor = 'ew-resize';
         e.preventDefault();
     }
@@ -117,36 +165,49 @@ document.addEventListener('mousemove', e => {
     currentPad.style.width = snappedWidth + 'px';
 });
 
-document.addEventListener('mouseup', () => {
+function endResize() {
     if (isResizing) {
         isResizing = false;
         currentPad = null;
         document.body.style.cursor = 'default';
     }
-});
+}
+document.addEventListener('mouseup', endResize);
+document.addEventListener('mouseleave', endResize);
+window.addEventListener('blur', endResize);
 
 // --- 5. LÓGICA DE AUDIO (REPRODUCCIÓN) ---
 function playSound(index, time) {
-    if (!audioBuffers[index]) return;
+    if (!audioCtx || !audioBuffers[index] || !filters[index]) return;
+
     const source = audioCtx.createBufferSource();
     source.buffer = audioBuffers[index];
-    source.playbackRate.value = document.getElementById('drum-pitch-control').value;
+    source.playbackRate.value = getNumericValue('drum-pitch-control', 1);
     source.connect(filters[index]);
-    source.start(time);
+    try {
+        source.start(time);
+    } catch (e) {
+        console.error(`ezdaw: error al reproducir el sample #${index}:`, e);
+    }
 }
 
 function playNote(note, time) {
-    if (!audioBuffers[4]) return;
+    if (!audioCtx || !audioBuffers[4]) return;
+    if (!Object.prototype.hasOwnProperty.call(notes, note)) return;
 
-    const decayValue = parseFloat(document.getElementById('piano-decay').value);
+    const decayValue = getNumericValue('piano-decay', 0.2);
     const activePads = document.querySelectorAll(`.piano-pad[data-note="${note}"].active`);
     let noteDuration = 0.15;
-    
+
     activePads.forEach(p => {
-        if(parseInt(p.dataset.step) === currentStep) {
-            noteDuration = (parseInt(p.style.width) / 100) * (60 / bpm / 4);
+        if (parseInt(p.dataset.step, 10) === currentStep) {
+            const widthPx = parseInt(p.style.width, 10);
+            const safeWidth = Number.isFinite(widthPx) ? widthPx : 100;
+            noteDuration = (safeWidth / 100) * (60 / bpm / 4);
         }
     });
+
+    if (!Number.isFinite(noteDuration) || noteDuration <= 0) noteDuration = 0.15;
 
     const source = audioCtx.createBufferSource();
     const gain = audioCtx.createGain();
@@ -155,85 +216,168 @@ function playNote(note, time) {
     source.buffer = audioBuffers[4];
 
     // Pitch (Afinación)
-    const baseFreq = 130.81; 
+    const baseFreq = 130.81;
     const playbackRate = notes[note] / baseFreq;
     source.playbackRate.setValueAtTime(playbackRate, time);
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(3500, time);
-    filter.Q.setValueAtTime(8, time); 
+    filter.Q.setValueAtTime(8, time);
 
-    const releaseTime = decayValue;
+    const releaseTime = Number.isFinite(decayValue) && decayValue > 0 ? decayValue : 0.2;
     const totalDuration = noteDuration + releaseTime;
 
-
     gain.gain.setValueAtTime(0, time);
-    gain.gain.linearRampToValueAtTime(0.4, time + 0.01); 
+    gain.gain.linearRampToValueAtTime(0.4, time + 0.01);
     gain.gain.setValueAtTime(0.4, time + noteDuration);
     gain.gain.linearRampToValueAtTime(0.0001, time + totalDuration);
     source.connect(filter);
     filter.connect(gain);
     gain.connect(audioCtx.destination);
 
-    source.start(time);
-    source.stop(time + totalDuration);
+    try {
+        source.start(time);
+        source.stop(time + totalDuration);
+    } catch (e) {
+        console.error(`ezdaw: error al reproducir la nota ${note}:`, e);
+    }
 }
 
 // --- 6. MOTOR DE TIEMPO (ESTABLE EN SEGUNDO PLANO) ---
 function nextNote() {
     const secondsPerBeat = 60.0 / bpm;
-    nextStepTime += 0.25 * secondsPerBeat; 
+    nextStepTime += 0.25 * secondsPerBeat;
     currentStep = (currentStep + 1) % 16;
 }
 
 function scheduleStep(step, time) {
     document.querySelectorAll(`.pad[data-step="${step}"].active`).forEach(p => {
-        playSound(parseInt(p.dataset.row), time);
+        playSound(parseInt(p.dataset.row, 10), time);
     });
     document.querySelectorAll(`.piano-pad[data-step="${step}"].active`).forEach(p => {
         playNote(p.dataset.note, time);
     });
-    const drawTime = (time - audioCtx.currentTime) * 1000;
+
+    const drawTime = Math.max(0, (time - audioCtx.currentTime) * 1000);
     setTimeout(() => {
         if (!isPlaying) return;
-        document.getElementById('drum-playhead').style.left = (step * 35) + "px";
-        document.getElementById('playhead').style.left = (step * 100) + "px";
+
+        // --- SINCRO EXACTA CON EL CSS ---
+        const drumPadWidth = 30;    // CORREGIDO: 30px según tu css grid
+        const drumGap = 8;         // 8px de espacio
+        const drumPaddingLeft = 12; // 12px de padding interior del grid
+
+        const pianoStepWidth = 100; // Coincide con tus piano-pads (width: 100px)
+
+        const drumHead = document.getElementById('drum-playhead');
+        const pianoHead = document.getElementById('playhead');
+        
+        // Fórmulas de alineación absoluta perfectas
+        if (drumHead) {
+            drumHead.style.left = (drumPaddingLeft + (step * (drumPadWidth + drumGap))) + "px";
+        }
+        if (pianoHead) {
+            pianoHead.style.left = (step * pianoStepWidth) + "px";
+        }
     }, drawTime);
 }
 
 function scheduler() {
-    while (nextStepTime < audioCtx.currentTime + scheduleAheadTime) {
-        scheduleStep(currentStep, nextStepTime);
-        nextNote();
+    if (!audioCtx) return;
+    try {
+        while (nextStepTime < audioCtx.currentTime + scheduleAheadTime) {
+            scheduleStep(currentStep, nextStepTime);
+            nextNote();
+        }
+    } catch (e) {
+        console.error("ezdaw: error en el scheduler, deteniendo la reproducción:", e);
+        stopPlayback();
+    }
+}
+
+function stopPlayback() {
+    isPlaying = false;
+    if (timerID) {
+        clearInterval(timerID);
+        timerID = null;
+    }
+    const playBtn = document.getElementById('play-pause');
+    if (playBtn) {
+        playBtn.textContent = "Play";
+        playBtn.classList.remove('is-playing');
     }
 }
 
 // --- 7. EVENTOS DE CONTROL ---
-document.getElementById('play-pause').onclick = async function () {
-    await initAudio();
-    if (audioCtx.state === 'suspended') await audioCtx.resume();
+const playPauseBtn = getEl('play-pause');
+if (playPauseBtn) {
+    let isLoading = false;
 
-    isPlaying = !isPlaying;
-    this.textContent = isPlaying ? "Stop" : "Play";
+    playPauseBtn.onclick = async function () {
+        if (isLoading) return;
 
-    if (isPlaying) {
-        currentStep = 0;
-        nextStepTime = audioCtx.currentTime;
-        timerID = setInterval(scheduler, 25);
-    } else {
-        clearInterval(timerID);
-    }
-};
+        if (!audioCtx) {
+            isLoading = true;
+            const originalText = this.textContent;
+            this.disabled = true;
+            this.textContent = "Cargando...";
+            try {
+                await initAudio();
+            } finally {
+                this.disabled = false;
+                this.textContent = originalText;
+                isLoading = false;
+            }
+        }
 
-document.getElementById('bpm').oninput = (e) => {
-    bpm = e.target.value;
-    document.getElementById('bpm-display').textContent = `${bpm} BPM`;
-};
+        if (!audioCtx) return;
+
+        if (audioCtx.state === 'suspended') {
+            try {
+                await audioCtx.resume();
+            } catch (e) {
+                console.error("ezdaw: no se pudo reanudar el AudioContext:", e);
+                return;
+            }
+        }
+
+        isPlaying = !isPlaying;
+        this.textContent = isPlaying ? "Stop" : "Play";
+        this.classList.toggle('is-playing', isPlaying);
+
+        if (isPlaying) {
+            currentStep = 0;
+            nextStepTime = audioCtx.currentTime;
+            if (timerID) clearInterval(timerID);
+            timerID = setInterval(scheduler, 25);
+        } else if (timerID) {
+            clearInterval(timerID);
+            timerID = null;
+        }
+    };
+}
+
+const bpmSlider = getEl('bpm');
+if (bpmSlider) {
+    bpmSlider.oninput = (e) => {
+        const parsed = parseFloat(e.target.value);
+        bpm = Number.isFinite(parsed) ? Math.min(300, Math.max(20, parsed)) : bpm;
+        const display = document.getElementById('bpm-display');
+        if (display) display.textContent = `${bpm} BPM`;
+    };
+}
 
 document.querySelectorAll('.drum-pitch-slider[data-row]').forEach(slider => {
     slider.oninput = (e) => {
         const row = e.target.dataset.row;
-        if (filters[row]) filters[row].frequency.value = e.target.value;
+        const value = parseFloat(e.target.value);
+        if (filters[row] && Number.isFinite(value)) {
+            filters[row].frequency.value = value;
+        }
     };
 });
 
 document.addEventListener('contextmenu', e => e.preventDefault());
+
+window.addEventListener('beforeunload', () => {
+    if (timerID) clearInterval(timerID);
+});

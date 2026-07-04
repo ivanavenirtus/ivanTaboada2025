@@ -10,6 +10,7 @@
     --border-color: #2a2a2a;
     --text-gray: #aaaaaa;
     --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    --transition: 0.15s ease;
 }
 
 * { box-sizing: border-box; }
@@ -55,7 +56,7 @@ main.wrap.section {
     gap: 28px;
 }
 
-/* --- CONTROLES SUPERIORES (PLAY / BPM / DECAY) --- */
+/* --- CONTROLES SUPERIORES --- */
 .controls {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -65,6 +66,10 @@ main.wrap.section {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.12);
     margin-bottom: 25px;
+}
+
+#play-pause {
+    order: 1;
 }
 
 .btn {
@@ -78,16 +83,24 @@ main.wrap.section {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     border-radius: 0;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color var(--transition), border-color var(--transition);
 }
 
 .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(255, 0, 127, 0.18);
+    background-color: var(--accent-pink);
+    border-color: var(--accent-pink);
+    color: #fff;
 }
 
 .btn:active {
     transform: scale(0.98);
+}
+
+#play-pause.is-playing {
+    background-color: var(--accent-pink);
+    color: #fff;
+    border-color: var(--accent-pink);
+    box-shadow: 0 0 12px rgba(255, 0, 127, 0.22);
 }
 
 .control-group {
@@ -107,10 +120,10 @@ main.wrap.section {
     letter-spacing: 0.12em;
 }
 
-/* --- BATERÍA (CON ESPACIO PARA RESPIRAR) --- */
+/* --- BATERÍA (DESKTOP CORREGIDO) --- */
 .sequencer-wrapper {
     display: grid;
-    grid-template-columns: 70px minmax(0, 1fr) 260px;
+    grid-template-columns: 80px minmax(0, 1fr) 260px;
     gap: 24px;
     align-items: start;
     padding: 24px;
@@ -121,20 +134,26 @@ main.wrap.section {
 }
 
 .instrument-labels {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 70px;
+    display: grid;            /* Cambiado a Grid para un calce matemático exacto por canal */
+    grid-template-rows: repeat(4, 76px); 
+    gap: 8px;                 /* Mismo gap exacto que la rejilla principal */
+    width: 80px;
     flex-shrink: 0;
-    padding-top: 6px;
+    padding: 31px 0 0;        /* Alineación perfecta calculando paddings y bordes del contenedor */
 }
 
 .instrument-labels span {
-    font-size: 0.65rem;
+    font-size: 0.65rem;       /* Ajuste ligero para óptima lectura */
     color: var(--text-gray);
-    height: 45px;
+    height: 76px;
     display: flex;
-    align-items: center;
+    align-items: center;      /* Centrado vertical real en su fila correspondiente */
+    justify-content: flex-start;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
 }
 
 .sequencer-relative-container {
@@ -150,43 +169,63 @@ main.wrap.section {
 }
 
 .sequencer-grid {
+    position: relative;        /* Contiene de manera absoluta el playhead */
     display: grid;
     grid-template-columns: repeat(16, 30px);
-    grid-template-rows: repeat(4, 45px);
+    grid-template-rows: repeat(4, 76px); 
     gap: 8px;
     background: rgba(255,255,255,0.05);
     padding: 12px;
     min-width: max-content;
 }
 
-/* CONTROLES DE TONO (ESPACIADO) */
-.knob-group {
+/* --- PANEL DE SLIDERS COMPACTOS --- */
+.effects-panel {
     display: grid;
-    gap: 10px;
-    padding: 12px 0;
+    grid-template-rows: repeat(4, 76px); 
+    gap: 8px; 
+    padding-top: 12px; 
+}
+
+.knob-group {
+    display: flex;
+    flex-direction: row; 
+    align-items: center; 
+    gap: 14px;
+    height: 76px; 
+    padding: 0;
 }
 
 .knob-group label {
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     color: #c8c8c8;
-    width: 100%;
+    width: 55px; 
     text-align: left;
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
 
+.knob-group input[type=range] {
+    flex: 1; 
+    margin: 0;
+}
+
 /* --- PIANO ROLL --- */
 .piano-roll-container {
     border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.04);
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
     position: relative;
     margin-bottom: 50px;
     overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
 }
 
 .piano-roll-header {
-    padding: 18px 24px 12px;
+    padding: 10px 16px 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .piano-roll-header h3 {
@@ -199,40 +238,46 @@ main.wrap.section {
 
 .piano-roll-wrapper {
     display: flex;
-    height: 260px;
+    height: 272px; 
     overflow-x: auto;
     overflow-y: hidden;
     position: relative;
+    background: rgba(6, 6, 6, 0.85);
 }
 
 .piano-keys-sidebar {
-    width: 62px;
+    width: 70px;
     background: rgba(10, 10, 10, 0.98);
     position: sticky;
     left: 0;
     z-index: 100;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
 }
 
 .key {
-    height: 30px;
+    height: 34px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
-    font-size: 0.68rem;
+    padding-bottom: 4px;
+    font-size: 0.6rem;
     color: #b3b3b3;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0 2px;
 }
 
 #piano-sequencer {
     position: relative;
     min-width: 1000px;
-    height: 260px;
+    height: 272px;
     background-image:
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-        linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-    background-size: 100% 30px, 120px 100%;
+        linear-gradient(to bottom, transparent 33px, rgba(255, 255, 255, 0.08) 33px, rgba(255, 255, 255, 0.08) 34px),
+        linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 100% 34px, 100px 100%;
+    background-color: rgba(255,255,255,0.02);
 }
 
 /* --- PADS Y NOTAS --- */
@@ -242,12 +287,11 @@ main.wrap.section {
     cursor: pointer;
     border-radius: 0;
     width: 30px;
-    height: 45px;
-    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    height: 76px; 
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .pad:hover {
-    transform: translateY(-1px);
     background: rgba(255, 255, 255, 0.12);
 }
 
@@ -259,16 +303,12 @@ main.wrap.section {
 
 .piano-pad {
     position: absolute;
-    height: 30px;
+    height: 34px;
     cursor: pointer;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(255,255,255,0.06);
     border-radius: 0;
     transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
-}
-
-.piano-pad:hover {
-    transform: translateY(-1px);
 }
 
 .piano-pad.active {
@@ -299,89 +339,146 @@ input[type=range]::-webkit-slider-thumb {
     margin-top: -7px;
 }
 
-/* --- PLAYHEADS --- */
+/* --- PLAYHEADS (ESTABILIZADOS) --- */
 .playhead, .playhead-drum {
     position: absolute;
-    top: 0;
-    width: 2px;
-    height: 100%;
     pointer-events: none;
     z-index: 50;
 }
-.playhead-drum { background: var(--accent-pink); box-shadow: 0 0 10px var(--accent-pink); }
-.playhead { background: var(--accent-orange); box-shadow: 0 0 10px var(--accent-orange); }
 
-/* --- RESPONSIVIDAD --- */
+.playhead-drum { 
+    top: 12px;                 /* Sincronizado con el padding-top de .sequencer-grid */
+    height: 328px;             /* (4 filas * 76px) + (3 gaps * 8px) = Encaja clavado con la altura del grid gris */
+    width: 2px;
+    background: var(--accent-pink); 
+    box-shadow: 0 0 10px var(--accent-pink); 
+    left: 12px;                /* Sincronizado con el padding-left de .sequencer-grid */
+}
+
+.playhead { 
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: var(--accent-orange); 
+    box-shadow: 0 0 10px var(--accent-orange); 
+}
+
+/* --- RESPONSIVIDAD (MOBILE / TABLET) --- */
 @media (max-width: 900px) {
     main.wrap.section {
-        padding: 24px 18px 20px;
+        padding: 16px;
+        margin-top: 2rem;
     }
 
-    .sequencer-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+    .main-title {
+        font-size: 1.6rem;
     }
 
-    .sequencer-relative-container,
-    .sequencer-grid,
-    .piano-roll-container,
-    .control-group,
     .controls {
+        grid-template-columns: 1fr;
+        padding: 12px;
+        gap: 12px;
+    }
+
+    #play-pause {
+        order: 0;
         width: 100%;
     }
 
     .sequencer-wrapper {
-        padding: 18px;
-    }
-
-    .sequencer-grid {
-        overflow-x: auto;
-        min-width: 100%;
-        grid-template-columns: repeat(8, minmax(40px, 1fr));
-    }
-
-    .piano-roll-wrapper {
-        height: 220px;
-    }
-
-    .piano-keys-sidebar {
-        position: static;
-        width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        border-right: none;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: 0px;
+        padding: 12px 8px;
+        overflow-x: auto !important; 
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
     }
 
     .instrument-labels {
-        flex-direction: row;
-        width: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important; 
+        width: 70px; 
+        flex-shrink: 0 !important;
+        padding: 12px 0 0 4px !important; 
+        z-index: 10;
+        margin: 0 !important;
     }
 
     .instrument-labels span {
-        height: auto;
-        padding: 10px 0;
+        height: 76px !important; 
+        font-size: 0.55rem;
+        display: flex;
+        align-items: center;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        line-height: 1;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    .drum-controls {
-        margin-left: 0;
-        margin-top: 25px;
-        padding-left: 0;
-        border-left: none;
-        border-top: 1px solid #1a1a1a;
-        padding-top: 20px;
-        width: 100%;
+    .sequencer-relative-container {
+        display: block !important;
+        width: auto !important;
+        max-width: none !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important; 
+        margin: 0 !important;
+        flex-shrink: 0 !important;
+    }
+
+    .sequencer-grid {
+        margin-left: 10px;
+        flex-shrink: 0 !important;
+        min-width: max-content !important; 
+    }
+
+    .effects-panel {
+        display: none !important; 
+    }
+
+    .piano-roll-wrapper {
+        height: 272px !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .piano-keys-sidebar {
+        position: sticky !important;
+        left: 0;
+        width: 60px;
+        height: 272px;
+        display: block;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        z-index: 100;
+    }
+
+    .key {
+        height: 34px !important;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    #piano-sequencer {
+        min-width: 1000px !important;
+        height: 272px !important;
     }
 }
 
 /* SCROLLBARS */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #050505; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 0; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-pink); }
 
+/* --- BORDES SIEMPRE CUADRADOS --- */
 .wrap.hero, .controls, .btn, .control-group, .sequencer-wrapper, .sequencer-relative-container, .sequencer-grid, .piano-roll-container, .pad, .piano-pad, .piano-roll-header { border-radius: 0 !important; }
 ::-webkit-scrollbar-thumb { border-radius: 0 !important; }
-
-

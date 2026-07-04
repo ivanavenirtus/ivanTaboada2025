@@ -50,25 +50,32 @@
                     </div>
 
                     <div class="sequencer-relative-container">
-                        <div id="sequencer" class="sequencer-grid"></div>
-                        <div id="drum-playhead" class="playhead-drum"></div>
+                        <!-- SOLUCIÓN: El playhead ahora vive dentro del grid para heredar sus dimensiones y scroll -->
+                        <div id="sequencer" class="sequencer-grid">
+                            <div id="drum-playhead" class="playhead-drum"></div>
+                        </div>
                     </div>
 
                     <div class="effects-panel">
                         <div class="knob-group">
-                            <label class="label-fixed-knob typewriter desc">TONE 1</label>
+                            <label class="label-fixed-knob typewriter desc">Bass</label>
                             <input type="range" class="knob drum-pitch-slider" data-row="0" min="40" max="5000"
                                 value="3000">
                         </div>
                         <div class="knob-group">
-                            <label class="label-fixed-knob typewriter desc">TONE 2</label>
+                            <label class="label-fixed-knob typewriter desc">Medium</label>
                             <input type="range" class="knob drum-pitch-slider" data-row="1" min="200" max="8000"
                                 value="4000">
                         </div>
                         <div class="knob-group">
-                            <label class="label-fixed-knob typewriter desc">TONE 3</label>
+                            <label class="label-fixed-knob typewriter desc">High</label>
                             <input type="range" class="knob drum-pitch-slider" data-row="2" min="1000" max="15000"
                                 value="10000">
+                        </div>
+                        <div class="knob-group">
+                            <label class="label-fixed-knob typewriter desc">High2</label>
+                            <input type="range" class="knob drum-pitch-slider" data-row="3" min="1000" max="15000"
+                                value="12000">
                         </div>
                     </div>
                 </div>
@@ -79,20 +86,14 @@
                     </div>
                     <div class="piano-roll-wrapper">
                         <div class="piano-keys-sidebar">
-                            <div class="key white"><span class="typewriter desc">C4</span></div>
-                            <div class="key black"></div>
-                            <div class="key white"><span class="typewriter desc">B3</span></div>
-                            <div class="key black"></div>
-                            <div class="key white"><span class="typewriter desc">A3</span></div>
-                            <div class="key black"></div>
-                            <div class="key white"><span class="typewriter desc">G3</span></div>
-                            <div class="key black"></div>
-                            <div class="key white"><span class="typewriter desc">F3</span></div>
-                            <div class="key white"><span class="typewriter desc">E3</span></div>
-                            <div class="key black"></div>
-                            <div class="key white"><span class="typewriter desc">D3</span></div>
-                            <div class="key black"></div>
-                            <div class="key white"><span class="typewriter desc">C3</span></div>
+                            <div class="key"><span class="typewriter desc">C4</span></div>
+                            <div class="key"><span class="typewriter desc">B3</span></div>
+                            <div class="key"><span class="typewriter desc">A3</span></div>
+                            <div class="key"><span class="typewriter desc">G3</span></div>
+                            <div class="key"><span class="typewriter desc">F3</span></div>
+                            <div class="key"><span class="typewriter desc">E3</span></div>
+                            <div class="key"><span class="typewriter desc">D3</span></div>
+                            <div class="key"><span class="typewriter desc">C3</span></div>
                         </div>
                         <div id="piano-sequencer">
                             <div id="playhead" class="playhead"></div>

@@ -137,16 +137,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const nameEl = document.querySelector("h2.typewriter");
   const descEl = document.querySelector("p.typewriter.desc");
 
-  if (nameEl && descEl) {
+  if (nameEl) {
     const nameText = nameEl.dataset.text || nameEl.textContent;
-    const descText = descEl.dataset.text || descEl.textContent;
 
     nameEl.textContent = "";
-    descEl.textContent = "";
 
-    new TypeWriter(nameEl, nameText, 100, () => {
-      new TypeWriter(descEl, descText, 50);
-    });
+    if (descEl) {
+      const descText = descEl.dataset.text || descEl.textContent;
+      descEl.textContent = "";
+
+      new TypeWriter(nameEl, nameText, 100, () => {
+        new TypeWriter(descEl, descText, 50);
+      });
+    } else {
+      new TypeWriter(nameEl, nameText, 100);
+    }
   }
 
 
