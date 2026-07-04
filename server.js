@@ -1,9 +1,7 @@
 import express from "express";
-import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import fs from "fs";
-import path from "path";
 
 // --- IMPORTAR RESPUESTAS LOCALES ---
 import { getLocalResponse } from "./api/localResponses.js";
@@ -14,50 +12,36 @@ if (fs.existsSync(".env.local")) {
 }
 dotenv.config();
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// Cambiado para usar tus credenciales de Groq configuradas en Vercel
+const GROQ_API_KEY = process.env.GROQ_API_KEY; 
 const FISH_API_KEY = process.env.FISH_API_KEY;
 const MY_VOICE_ID = process.env.MY_VOICE_ID;
 
 const app = express();
 app.use(express.json());
 
-// --- CONFIGURAR RUTA PARA ARCHIVOS ESTÁTICOS ---
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
-app.use(express.static(__dirname));
-
-// --- RUTA PRINCIPAL PARA SERVIR EL PORTAFOLIO ---
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
-});
-
-// --- RUTA DINÁMICA PARA SERVIR PÁGINAS INTERNAS (CHATBOT, ETC.) ---
-app.get("/pages/:pageName", (req, res) => {
-    const pageName = req.params.pageName;
-    res.sendFile(path.join(__dirname, "pages", pageName));
-});
-
-// --- ENDPOINT PARA EL CHAT ---
+// --- ENDPOINT PARA EL CHAT (AHORA CON GROQ) ---
 app.post("/api/chat", async (req, res) => {
     try {
         const userMessage = req.body.message || "";
 
-        if (!OPENAI_API_KEY) {
-            return res.status(401).json({ error: "Token no encontrado" });
+        if (!GROQ_API_KEY) {
+            return res.status(401).json({ error: "Token de Groq no encontrado en el servidor" });
         }
 
         // --- RESPUESTA LOCAL ---
         const localResponse = await getLocalResponse(userMessage);
         if (localResponse) return res.json({ text: localResponse });
 
-        // --- LLAMADA A OPENAI ---
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        // --- LLAMADA A GROQ ---
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${OPENAI_API_KEY}`,
+                Authorization: `Bearer ${GROQ_API_KEY}`,
             },
             body: JSON.stringify({
-                model: "gpt-4o-mini",
+                model: "llama3-8b-8192", // Modelo rápido y eficiente de Groq
                 messages: [
                     { role: "system", content: "Eres un asistente útil y amable." },
                     { role: "user", content: userMessage },
@@ -67,8 +51,8 @@ app.post("/api/chat", async (req, res) => {
         });
 
         if (!response.ok) {
-            console.error("Error HTTP:", response.status, await response.text());
-            return res.status(500).json({ error: "Error al conectar con OpenAI" });
+            console.error("Error HTTP Groq:", response.status, await response.text());
+            return res.status(500).json({ error: "Error al conectar con Groq" });
         }
 
         const data = await response.json();
@@ -76,7 +60,7 @@ app.post("/api/chat", async (req, res) => {
         res.json({ text });
 
     } catch (error) {
-        console.error("Error interno:", error);
+        console.error("Error interno chat:", error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
 });
@@ -126,5 +110,4 @@ if (process.env.NODE_ENV !== "production") {
     app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
 }
 
-// Al final de tu server.js para Vercel
 export default app;
