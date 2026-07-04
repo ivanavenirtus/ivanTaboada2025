@@ -25,9 +25,15 @@ app.use(express.json());
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 app.use(express.static(__dirname));
 
-// --- RUTA PRINCIPAL PARA SERVIR EL FRONTEND ---
+// --- RUTA PRINCIPAL PARA SERVIR EL PORTAFOLIO ---
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// --- RUTA DINÁMICA PARA SERVIR PÁGINAS INTERNAS (CHATBOT, ETC.) ---
+app.get("/pages/:pageName", (req, res) => {
+    const pageName = req.params.pageName;
+    res.sendFile(path.join(__dirname, "pages", pageName));
 });
 
 // --- ENDPOINT PARA EL CHAT ---
