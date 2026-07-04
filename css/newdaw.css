@@ -228,7 +228,7 @@ main.wrap.section {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.12);
     overflow: hidden;
-    height: 340px;
+    height: 580px;
 }
 
 .audio-browser {
@@ -547,7 +547,7 @@ input[type=range]::-moz-range-thumb {
     }
 
     .playlist-container {
-        height: 300px;
+        height: 520px;
     }
 
     .audio-browser {
@@ -624,7 +624,7 @@ input[type=range]::-moz-range-thumb {
 
     /* Layout horizontal: browser a la izquierda, timeline a la derecha */
     .playlist-container {
-        height: 280px;
+        height: 500px;
         flex-direction: row;
     }
 
