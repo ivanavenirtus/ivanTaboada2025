@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const header = document.querySelector("header");
 
-  //CR
+  // --- CREACIÓN DEL NAV ---
   let navWrap = header.querySelector(".wrap.nav");
   if (!navWrap) {
     navWrap = document.createElement("div");
@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const inPages = window.location.pathname.includes("/pages/");
 
-    //ENRUTAR LINKS
+    // --- ENRUTAR LINKS ---
     const indexLink = inPages ? "../index.html" : "index.html";
     const proyectosLink = inPages ? "proyectos.html" : "pages/proyectos.html";
     const acercaLink = inPages ? "acerca.html" : "pages/acerca.html";
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const navLinks = navWrap.querySelector(".nav-links");
 
-  //BOTÓN HAMBURGUESA
+  // --- BOTÓN HAMBURGUESA ---
   let hamburger = navWrap.querySelector(".hamburger");
   if (!hamburger) {
     hamburger = document.createElement("div");
@@ -51,13 +51,13 @@ document.addEventListener("DOMContentLoaded", () => {
     link.addEventListener("click", () => navLinks.classList.remove("active"));
   });
 
-  //RESALTAR LINK ACTIVO
+  // --- RESALTAR LINK ACTIVO ---
   const currentPage = window.location.pathname.split("/").pop();
   navLinks.querySelectorAll("a").forEach(link => {
     if (link.getAttribute("href").includes(currentPage)) link.classList.add("active");
   });
 
-  //LOOP IDIOMAS H1
+  // --- LOOP IDIOMAS H1 ---
   class TypeWriterLoop {
     constructor(element, texts, speed = 80, pause = 1500) {
       this.element = element;
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ]);
   }
 
-  //TYPEWRITER H2 + P
+  // --- TYPEWRITER H2 + P ---
   class TypeWriter {
     constructor(element, text, speed = 100, callback = null) {
       this.element = element;
@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  //NAVBAR OCULTAR/SHRINK AL SCROLL
+  // --- NAVBAR OCULTAR/SHRINK AL SCROLL ---
   let lastScroll = 0;
   window.addEventListener("scroll", () => {
     const currentScroll = window.scrollY;

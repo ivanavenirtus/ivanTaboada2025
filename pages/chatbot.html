@@ -44,32 +44,30 @@
         const sendBtn = document.querySelector("#send-btn");
         const avatarVideo = document.querySelector("#avatar-video");
 
-        // Rutas físicas de tus recursos multimedia.
         const VIDEO_IDLE = "../assets/media/ivan_idle.gif";
         const VIDEO_TALKING = "../assets/media/ivan_talking.gif";
 
         let isTyping = false;
 
         function setAvatarState(src, talking) {
-            if (avatarVideo.getAttribute("src") !== src) {
+            if (!avatarVideo) return;
+            if (avatarVideo.src !== new URL(src, window.location.href).href) {
                 avatarVideo.src = src;
             }
-
             avatarVideo.classList.toggle("talking-ui", talking);
         }
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const message = input.value.trim();
-            if (!message || isTyping) return;
+        function appendMessage(sender, text) {
+            if (!chatBox) return;
+            const messageEl = document.createElement("div");
+            messageEl.className = sender;
+            messageEl.textContent = `${sender === "user" ? "USER:" : "IVÁN:"} ${text}`;
+            chatBox.appendChild(messageEl);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
-            // Añadir mensaje del usuario en pantalla
-            addMessage("user", message);
-            input.value = "";
-            sendBtn.disabled = true;
-
+        async function postMessage(message) {
             try {
-                // Petición POST directa a tu handler de Node.js
                 const res = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -77,55 +75,59 @@
                 });
 
                 const data = await res.json();
-                const botReply = data.text || "No tengo respuesta.";
-
-                // Despachar el renderizado dinámico con máquina de escribir y video activo
-                addBotMessageWithVoice(botReply);
-
-            } catch (err) {
-                console.error("Error al procesar la respuesta del servidor:", err);
-                addBotMessageWithVoice("X Error de enlace: Hubo un problema al conectar con el servidor.");
+                return data.text || data.error || "No tengo respuesta.";
+            } catch (error) {
+                console.error("Error al enviar mensaje:", error);
+                return "Ocurrió un error al enviar tu mensaje.";
             }
-        });
-
-        function addMessage(sender, text) {
-            const div = document.createElement("div");
-            div.className = sender;
-            div.textContent = `${sender === "user" ? "USER:" : "IVÁN:"} ${text}`;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function addBotMessageWithVoice(text) {
-            const div = document.createElement("div");
-            div.className = "bot";
-            div.textContent = "IVÁN: ";
-            chatBox.appendChild(div);
+        async function handleSubmit(event) {
+            event.preventDefault();
 
-            // 1. INTERCAMBIO DE VIDEO A MODO "HABLANDO"
+            const message = input?.value.trim();
+            if (!message || isTyping) return;
+
+            appendMessage("user", message);
+            if (input) input.value = "";
+            if (sendBtn) sendBtn.disabled = true;
+
             isTyping = true;
             setAvatarState(VIDEO_TALKING, true);
 
-            let index = 0;
-            const speed = 30; // Velocidad del efecto Typewriter en ms
+            const botReply = await postMessage(message);
+            renderBotReply(botReply);
+        }
 
-            function typeWriterEffect() {
+        function renderBotReply(text) {
+            if (!chatBox) return;
+
+            const messageEl = document.createElement("div");
+            messageEl.className = "bot";
+            messageEl.textContent = "IVÁN: ";
+            chatBox.appendChild(messageEl);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            let index = 0;
+            const speed = 30;
+
+            function typeWriter() {
                 if (index < text.length) {
-                    div.textContent += text[index];
-                    index++;
+                    messageEl.textContent += text[index++];
                     chatBox.scrollTop = chatBox.scrollHeight;
-                    setTimeout(typeWriterEffect, speed);
-                } else {
-                    // 2. RETORNO DE VIDEO A ESTADO "IDLE" AL CONCLUIR EL TEXTO
-                    setAvatarState(VIDEO_IDLE, false);
-                    isTyping = false;
-                    sendBtn.disabled = false;
-                    input.focus();
+                    setTimeout(typeWriter, speed);
+                    return;
                 }
+                isTyping = false;
+                setAvatarState(VIDEO_IDLE, false);
+                if (sendBtn) sendBtn.disabled = false;
+                if (input) input.focus();
             }
 
-            typeWriterEffect();
+            typeWriter();
         }
+
+        form?.addEventListener("submit", handleSubmit);
     </script>
 
 </body>

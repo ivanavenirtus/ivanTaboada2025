@@ -673,12 +673,15 @@ pre#output {
   }
 
   .cta-row {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
   }
 
   .btn {
-    width: 100%;
+    width: auto;
+    flex: 0 0 auto;
     text-align: center;
   }
 }

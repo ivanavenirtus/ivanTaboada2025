@@ -1,21 +1,56 @@
-import fetch from "node-fetch";
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const creatorKeywords = ["quien te creo", "quien es tu creador", "quien te programo", "quien te hizo", "quien te diseño", "quien te diseñó", "quien te desarrolló", "who created you", "who is your creator", "who made you", "who coded you", "who developed you"];
+const ageKeywords = ["cuantos años tienes", "tu edad", "how old are you", "your age"];
+const birthdayKeywords = ["cuando es tu cumpleaños", "fecha de cumpleaños", "cuando cumples", "when is your birthday", "birthday"];
+const petKeywords = ["tienes mascotas", "mascotas", "do you have pets", "pet names"];
+const moodKeywords = ["como estas", "como te sientes", "how are you", "how are you doing"];
+const foodKeywords = ["comida favorita", "que te gusta comer", "favorite food", "what do you like to eat"];
+const musicKeywords = ["musica favorita", "que musica escuchas", "favorite music", "what music do you like"];
+const locationKeywords = ["de donde eres", "donde vives", "where are you from", "where do you live"];
+const goodbyeKeywords = ["adios", "chao", "hasta luego", "bye", "goodbye", "see you"];
+const hobbiesKeywords = ["que te gusta hacer", "cuales son tus hobbies", "what do you like to do", "what are your hobbies"];
+const siblingsKeywords = ["si tienes hermanos", "tienes hermanos", "tienes hermana", "tienes hermanos o hermanas", "hermanos", "tienes familia", "do you have siblings", "do you have a brother", "do you have a sister", "siblings", "brother", "sister", "do you have any siblings"];
+const nameKeywords = ["como te llamas", "tu nombre", "what is your name", "your name"];
 
-// --- PALABRAS CLAVE (KEYWORDS) ---
-export const creatorKeywords = ["quien te creo", "quien es tu creador", "quien te programo", "who created you", "who is your creator"];
-export const ageKeywords = ["cuantos años tienes", "tu edad", "how old are you", "your age"];
-export const birthdayKeywords = ["cuando es tu cumpleaños", "fecha de cumpleaños", "cuando cumples", "when is your birthday", "birthday"]; // <-- AÑADIDA
-export const petKeywords = ["tienes mascotas", "mascotas", "do you have pets", "pet names"];
-export const moodKeywords = ["como estas", "como te sientes", "how are you", "how are you doing"];
-export const foodKeywords = ["comida favorita", "que te gusta comer", "favorite food", "what do you like to eat"];
-export const musicKeywords = ["musica favorita", "que musica escuchas", "favorite music", "what music do you like"];
-export const locationKeywords = ["de donde eres", "donde vives", "where are you from", "where do you live"];
-export const goodbyeKeywords = ["adios", "chao", "hasta luego", "bye", "goodbye", "see you"];
-export const hobbiesKeywords = ["que te gusta hacer", "cuales son tus hobbies", "what do you like to do", "what are your hobbies"]; 
-export const nameKeywords = ["como te llamas", "tu nombre", "what is your name", "your name"];
+const keywordGroups = {
+    name: nameKeywords,
+    age: ageKeywords,
+    birthday: birthdayKeywords,
+    pet: petKeywords,
+    siblings: siblingsKeywords,
+    creator: creatorKeywords,
+    mood: moodKeywords,
+    food: foodKeywords,
+    music: musicKeywords,
+    location: locationKeywords,
+    goodbye: goodbyeKeywords,
+    hobbies: hobbiesKeywords
+};
 
-// --- DICCIONARIO DE RESPUESTAS ---
+const cannedResponses = {
+    name: {
+        es: "Me puedes llamar Iván.",
+        en: "My name is Ivan!"
+    },
+    age: {
+        es: "Tengo 24 años.",
+        en: "I am 24 years old."
+    },
+    pet: {
+        es: "Tengo una gatita llamada Ophelia y dos perritas: Kyoto y Akira.",
+        en: "I have a kitty named Ophelia and two doggies: Kyoto and Akira!"
+    },
+    siblings: {
+        es: "Tengo una hermana que se llama Sofía.",
+        en: "I have one sister named Sofía."
+    },
+    creator: {
+        es: "Fui creado por Iván.",
+        en: "I was created by Iván."
+    }
+};
+
 const responses = {
     mood: {
         es: ["¡Todo excelente por acá! Con mucha energía para platicar.", "¡Muy bien! Feliz de ayudarte.", "Todo genial, ¿y tú qué tal?"],
@@ -41,7 +76,7 @@ const responses = {
         es: ["Me encanta crear música, especialmente trap!", "Disfruto mucho jugar videojuegos.", "Programar es mi pasatiempo favorito."],
         en: ["I love creating music, especially trap!", "I really enjoy playing video games.", "Programming is my favorite hobby."]
     },
-    birthday: { 
+    birthday: {
         es: ["Mi cumpleaños es el 18 de octubre.", "¡Celebro mi cumpleaños el 18 de octubre!"],
         en: ["My birthday is October 18th.", "I celebrate my birthday on October 18th!"]
     }
@@ -73,8 +108,9 @@ export async function getLocalResponse(userMessage) {
     // --- MAPEO PALABRAS CLAVE (KEYWORDS) ---
     const isName = nameKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
     const isAge = ageKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
-    const isBirthday = birthdayKeywords.some(k => normalizedMessage.includes(normalizeMessage(k))); // <-- AÑADIDA
+    const isBirthday = birthdayKeywords.some(k => normalizedMessage.includes(normalizeMessage(k))); 
     const isPet = petKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
+    const isSiblings = siblingsKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
     const isCreator = creatorKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
     const isMood = moodKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
     const isFood = foodKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
@@ -94,6 +130,10 @@ export async function getLocalResponse(userMessage) {
         respuesta = lang === "en" 
             ? "I have a kitty named Ophelia and two doggies: Kyoto and Akira!" 
             : "Tengo una gatita llamada Ophelia y dos perritas: Kyoto y Akira.";
+    } else if (isSiblings) {
+        respuesta = lang === "en"
+            ? "I have one sister named Sofía."
+            : "Tengo una hermana que se llama Sofía.";
     } else if (isCreator) {
         respuesta = lang === "en" ? "I was created by Iván." : "Fui creado por Iván.";
     } else if (isMood) {

@@ -1,5 +1,4 @@
 import express from "express";
-import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
@@ -15,9 +14,8 @@ const app = express();
 app.use(express.json());
 
 //CONFIGURAR RUTA PARA ARCHIVOS ESTÁTICOS
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "public"))); // <--- mueve tu HTML/CSS/JS a /public
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+app.use(express.static(__dirname));
 
 //ENDPOINT PARA EL CHAT
 app.post("/api/chat", async (req, res) => {
