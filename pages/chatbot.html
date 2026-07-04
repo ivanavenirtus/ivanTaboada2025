@@ -170,11 +170,11 @@
                     return;
                 }
                 isTyping = false;
-                setAvatarState(VIDEO_IDLE, false);
                 if (sendBtn) sendBtn.disabled = false;
                 if (input) input.focus();
 
                 // --- REPRODUCIR AUDIO CON FISH AUDIO ---
+                // El avatar se detiene cuando el audio termina, no antes
                 playTTS(text);
             }
 
@@ -182,6 +182,7 @@
         }
 
         async function playTTS(text) {
+            // --- INTENTAR PRIMERO CON FISH AUDIO ---
             try {
                 const res = await fetch("/api/tts", {
                     method: "POST",
@@ -189,19 +190,49 @@
                     body: JSON.stringify({ text }),
                 });
 
-                if (!res.ok) {
-                    console.error("Error TTS:", res.status);
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const audioUrl = URL.createObjectURL(blob);
+                    const audio = new Audio(audioUrl);
+                    audio.onended = () => {
+                        URL.revokeObjectURL(audioUrl);
+                        setAvatarState(VIDEO_IDLE, false);
+                    };
+                    await audio.play();
                     return;
                 }
-
-                const blob = await res.blob();
-                const audioUrl = URL.createObjectURL(blob);
-                const audio = new Audio(audioUrl);
-                audio.onended = () => URL.revokeObjectURL(audioUrl);
-                await audio.play();
+                console.warn("Fish Audio falló (HTTP " + res.status + "), usando fallback Web Speech");
             } catch (error) {
-                console.error("Error al reproducir TTS:", error);
+                console.warn("Error Fish Audio, usando fallback Web Speech:", error);
             }
+
+            // --- FALLBACK: WEB SPEECH API (TTS del navegador) ---
+            speakWithBrowser(text);
+        }
+
+        function speakWithBrowser(text) {
+            if (!("speechSynthesis" in window)) {
+                console.error("Web Speech API no soportada en este navegador");
+                setAvatarState(VIDEO_IDLE, false);
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "es-ES";
+            utterance.rate = 1.4;
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            const spanishVoice = voices.find(v => v.lang.startsWith("es"));
+            if (spanishVoice) utterance.voice = spanishVoice;
+
+            utterance.onend = () => {
+                setAvatarState(VIDEO_IDLE, false);
+            };
+
+            window.speechSynthesis.speak(utterance);
         }
 
         form?.addEventListener("submit", handleSubmit);
