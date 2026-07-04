@@ -6,7 +6,7 @@ let nextStepTime = 0.0;
 const scheduleAheadTime = 0.1;
 let timerID = null; 
 
-// Variables para el Resize (Estiramiento)
+// --- VARIABLES PARA EL RESIZE (ESTIRAMIENTO) ---
 let isResizing = false;
 let currentPad = null;
 let startX, startWidth;
@@ -124,13 +124,13 @@ if (pianoSequencer) {
             pad.onmousedown = (e) => {
                 if (e.target.classList.contains('resizer')) return;
 
-                if (e.button === 2) {
+            if (e.button === 2) {
                     pad.classList.remove('active');
-                    pad.style.width = "100px"; // Reset de huella
+                    pad.style.width = "100px"; // --- Reset de huella ---
                 } else if (e.button === 0) {
                     if (pad.classList.contains('active')) {
                         pad.classList.remove('active');
-                        pad.style.width = "100px"; // Reset al desactivar
+                        pad.style.width = "100px"; // --- Reset al desactivar ---
                     } else {
                         pad.classList.add('active');
                         if (audioCtx) playNote(note, audioCtx.currentTime);
@@ -215,7 +215,7 @@ function playNote(note, time) {
 
     source.buffer = audioBuffers[4];
 
-    // Pitch (Afinación)
+    // --- Pitch (Afinación) ---
     const baseFreq = 130.81;
     const playbackRate = notes[note] / baseFreq;
     source.playbackRate.setValueAtTime(playbackRate, time);
@@ -261,17 +261,17 @@ function scheduleStep(step, time) {
     setTimeout(() => {
         if (!isPlaying) return;
 
-        // --- SINCRO EXACTA CON EL CSS ---
-        const drumPadWidth = 30;    // CORREGIDO: 30px según tu css grid
-        const drumGap = 8;         // 8px de espacio
-        const drumPaddingLeft = 12; // 12px de padding interior del grid
+        // --- Sincronización exacta con el CSS ---
+        const drumPadWidth = 30;    // --- 30px según el css grid ---
+        const drumGap = 8;          // --- 8px de espacio ---
+        const drumPaddingLeft = 12; // --- 12px de padding interior del grid ---
 
-        const pianoStepWidth = 100; // Coincide con tus piano-pads (width: 100px)
+        const pianoStepWidth = 100; // --- Coincide con los piano-pads (width: 100px) ---
 
         const drumHead = document.getElementById('drum-playhead');
         const pianoHead = document.getElementById('playhead');
         
-        // Fórmulas de alineación absoluta perfectas
+        // --- Fórmulas de alineación absoluta ---
         if (drumHead) {
             drumHead.style.left = (drumPaddingLeft + (step * (drumPadWidth + drumGap))) + "px";
         }

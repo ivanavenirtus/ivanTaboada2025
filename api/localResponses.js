@@ -92,7 +92,8 @@ function normalizeMessage(message) {
 
 function detectLanguage(message) {
     const normalized = normalizeMessage(message);
-    const englishPatterns = ["what", "how", "who", "your", "time", "weather", "age", "old", "bye", "live", "eat", "hobbies", "pets", "birthday"]; // <-- Se añadió birthday
+    // --- Patrones en inglés para detección de idioma ---
+    const englishPatterns = ["what", "how", "who", "your", "time", "weather", "age", "old", "bye", "live", "eat", "hobbies", "pets", "birthday"];
     return englishPatterns.some(word => normalized.includes(word)) ? "en" : "es";
 }
 
@@ -105,7 +106,7 @@ export async function getLocalResponse(userMessage) {
     const normalizedMessage = normalizeMessage(userMessage);
     const lang = detectLanguage(userMessage);
 
-    // --- MAPEO PALABRAS CLAVE (KEYWORDS) ---
+    // --- MAPEO DE PALABRAS CLAVE (KEYWORDS) ---
     const isName = nameKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
     const isAge = ageKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
     const isBirthday = birthdayKeywords.some(k => normalizedMessage.includes(normalizeMessage(k))); 

@@ -3,7 +3,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 
-//IMPORTAR RESPUESTAS LOCALES
+// --- IMPORTAR RESPUESTAS LOCALES ---
 import { getLocalResponse } from "./api/localResponses.js";
 
 dotenv.config();
@@ -13,11 +13,11 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const app = express();
 app.use(express.json());
 
-//CONFIGURAR RUTA PARA ARCHIVOS ESTÁTICOS
+// --- CONFIGURAR RUTA PARA ARCHIVOS ESTÁTICOS ---
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 app.use(express.static(__dirname));
 
-//ENDPOINT PARA EL CHAT
+// --- ENDPOINT PARA EL CHAT ---
 app.post("/api/chat", async (req, res) => {
     try {
         const userMessage = req.body.message || "";
@@ -26,11 +26,11 @@ app.post("/api/chat", async (req, res) => {
             return res.status(401).json({ error: "Token no encontrado" });
         }
 
-        //RESPUESTA LOCAL
+        // --- RESPUESTA LOCAL ---
         const localResponse = await getLocalResponse(userMessage);
         if (localResponse) return res.json({ text: localResponse });
 
-        //LLAMADA A OPENAI
+        // --- LLAMADA A OPENAI ---
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -62,6 +62,6 @@ app.post("/api/chat", async (req, res) => {
     }
 });
 
-//INICIAR SERVIDOR
+// --- INICIAR SERVIDOR ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));

@@ -1,6 +1,6 @@
-/* ============================================
-   TOKENS & RESET
-   ============================================ */
+/* ================================================= */
+/* ================= TOKENS & RESET ================ */
+/* ================================================= */
 :root {
     --color-bg: #0b0b0b;
     --color-surface: rgba(15, 15, 15, 0.92);
@@ -22,24 +22,12 @@ body {
     color: var(--color-text);
 }
 
-/* ============================================
-   HEADER
-   ============================================ */
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: var(--header-height);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    background: rgba(11, 11, 11, 0.8);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--color-border);
-    z-index: 1000;
-}
+/* ================================================= */
+/* ================= HEADER ======================== */
+/* ================================================= */
+/* --- El header, nav y hamburguesa usan los estilos globales
+     definidos en style.css para mantener el mismo comportamiento
+     responsivo en todas las páginas --- */
 
 .logo-container img {
     height: 40px;
@@ -48,9 +36,9 @@ header {
     display: block;
 }
 
-/* ============================================
-   LAYOUT CONTENT
-   ============================================ */
+/* ================================================= */
+/* ================= LAYOUT CONTENT ================ */
+/* ================================================= */
 body.subpage main.section {
     padding-top: calc(var(--header-height) + 1.5rem);
     display: flex;
@@ -94,9 +82,9 @@ body.subpage main.section {
     box-shadow: 0 32px 70px rgba(0, 0, 0, 0.35);
 }
 
-/* ============================================
-   CHAT BOX & MESSAGES (DIFERENCIADOS)
-   ============================================ */
+/* ================================================= */
+/* ================= CHAT BOX & MESSAGES =========== */
+/* ================================================= */
 .chat-box {
     flex: 1;
     overflow-y: auto;
@@ -131,13 +119,13 @@ body.subpage main.section {
     text-align: left;
 }
 
-/* Labels de remitente */
+/* --- Labels de remitente --- */
 .chat-box .user::before { content: "USER"; display: block; font-size: 0.65rem; color: var(--color-accent-pink); margin-bottom: 4px; }
 .chat-box .bot::before { content: "IVÁN"; display: block; font-size: 0.65rem; color: var(--color-accent-cyan); margin-bottom: 4px; }
 
-/* ============================================
-   INPUT AREA
-   ============================================ */
+/* ================================================= */
+/* ================= INPUT AREA ==================== */
+/* ================================================= */
 .input-area {
     display: flex;
     width: 100%;
@@ -166,9 +154,9 @@ body.subpage main.section {
     cursor: pointer;
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
+/* ================================================= */
+/* ================= RESPONSIVE ==================== */
+/* ================================================= */
 @media (max-width: 640px) {
     .chat-container { width: 100%; padding: 12px; }
     .input-area { flex-wrap: wrap; }

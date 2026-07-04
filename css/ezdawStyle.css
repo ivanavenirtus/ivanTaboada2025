@@ -120,7 +120,7 @@ main.wrap.section {
     letter-spacing: 0.12em;
 }
 
-/* --- BATERÍA (DESKTOP CORREGIDO) --- */
+/* --- BATERÍA (DESKTOP) --- */
 .sequencer-wrapper {
     display: grid;
     grid-template-columns: 80px minmax(0, 1fr) 260px;
@@ -134,20 +134,20 @@ main.wrap.section {
 }
 
 .instrument-labels {
-    display: grid;            /* Cambiado a Grid para un calce matemático exacto por canal */
+    display: grid;            /* --- Grid para un calce matemático exacto por canal --- */
     grid-template-rows: repeat(4, 76px); 
-    gap: 8px;                 /* Mismo gap exacto que la rejilla principal */
+    gap: 8px;                 /* --- Mismo gap exacto que la rejilla principal --- */
     width: 80px;
     flex-shrink: 0;
-    padding: 31px 0 0;        /* Alineación perfecta calculando paddings y bordes del contenedor */
+    padding: 31px 0 0;        /* --- Alineación perfecta calculando paddings y bordes --- */
 }
 
 .instrument-labels span {
-    font-size: 0.65rem;       /* Ajuste ligero para óptima lectura */
+    font-size: 0.65rem;       /* --- Ajuste ligero para óptima lectura --- */
     color: var(--text-gray);
     height: 76px;
     display: flex;
-    align-items: center;      /* Centrado vertical real en su fila correspondiente */
+    align-items: center;      /* --- Centrado vertical real en su fila correspondiente --- */
     justify-content: flex-start;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -169,7 +169,7 @@ main.wrap.section {
 }
 
 .sequencer-grid {
-    position: relative;        /* Contiene de manera absoluta el playhead */
+    position: relative;        /* --- Contiene de manera absoluta el playhead --- */
     display: grid;
     grid-template-columns: repeat(16, 30px);
     grid-template-rows: repeat(4, 76px); 
@@ -339,7 +339,7 @@ input[type=range]::-webkit-slider-thumb {
     margin-top: -7px;
 }
 
-/* --- PLAYHEADS (ESTABILIZADOS) --- */
+/* --- PLAYHEADS --- */
 .playhead, .playhead-drum {
     position: absolute;
     pointer-events: none;
@@ -347,12 +347,12 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 .playhead-drum { 
-    top: 12px;                 /* Sincronizado con el padding-top de .sequencer-grid */
-    height: 328px;             /* (4 filas * 76px) + (3 gaps * 8px) = Encaja clavado con la altura del grid gris */
+    top: 12px;                 /* --- Sincronizado con el padding-top de .sequencer-grid --- */
+    height: 328px;             /* --- (4 filas * 76px) + (3 gaps * 8px) = altura exacta del grid --- */
     width: 2px;
     background: var(--accent-pink); 
     box-shadow: 0 0 10px var(--accent-pink); 
-    left: 12px;                /* Sincronizado con el padding-left de .sequencer-grid */
+    left: 12px;                /* --- Sincronizado con el padding-left de .sequencer-grid --- */
 }
 
 .playhead { 
@@ -473,7 +473,7 @@ input[type=range]::-webkit-slider-thumb {
     }
 }
 
-/* SCROLLBARS */
+/* --- SCROLLBARS --- */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #050505; }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 0; }

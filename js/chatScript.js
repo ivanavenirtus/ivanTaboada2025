@@ -3,26 +3,26 @@ const input = document.querySelector("#user-input");
 const chatBox = document.querySelector("#chat-box");
 const sendBtn = document.querySelector("#send-btn");
 
-// Selección de los dos videos para evitar el parpadeo del botón nativo
+// --- SELECCIÓN DE VIDEOS DEL AVATAR ---
 const avatarIdle = document.querySelector("#avatar-idle");
 const avatarTalking = document.querySelector("#avatar-talking");
 
 let isTyping = false;
 
-// CORRECCIÓN: Detectar el idioma de las palabras clave de forma explícita
+// --- NORMALIZACIÓN DE MENSAJES DE CLIMA ---
 function normalizeWeatherMessage(message) {
   const lower = message.toLowerCase();
-  
-  // Palabras clave en inglés
+
+  // --- Palabras clave en inglés ---
   if (lower.includes("weather") || lower.includes("temperature")) {
     return "the weather";
   }
-  
-  // Palabras clave en español
+
+  // --- Palabras clave en español ---
   if (lower.includes("clima") || lower.includes("temperatura")) {
     return "la temperatura";
   }
-  
+
   return message;
 }
 
@@ -48,11 +48,11 @@ form.addEventListener("submit", async (e) => {
   const rawMessage = input.value.trim();
   if (!rawMessage || isTyping) return;
 
-  // Normalizamos el mensaje para la API interna
+  // --- Normalizamos el mensaje para la API interna ---
   const processedMessage = normalizeWeatherMessage(rawMessage);
 
-  // Mostramos en pantalla el texto original que escribió el usuario
-  addMessage("user", rawMessage); 
+  // --- Mostramos en pantalla el texto original del usuario ---
+  addMessage("user", rawMessage);
   input.value = "";
   if (sendBtn) sendBtn.disabled = true;
 
@@ -66,7 +66,7 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json();
     const botReply = data.text || data.error || "No tengo respuesta.";
 
-    // Renderizar la respuesta con el efecto typewriter y el avatar hablando
+    // --- Renderizar la respuesta con efecto typewriter y avatar hablando ---
     addBotMessageWithVoice(botReply);
 
   } catch (err) {
@@ -89,7 +89,7 @@ function addBotMessageWithVoice(text) {
   div.textContent = "IVÁN: ";
   chatBox.appendChild(div);
 
-  // Activamos el estado de habla en el avatar
+  // --- Activamos el estado de habla en el avatar ---
   isTyping = true;
   setAvatarState(true);
 
@@ -103,7 +103,7 @@ function addBotMessageWithVoice(text) {
       chatBox.scrollTop = chatBox.scrollHeight;
       setTimeout(typeWriterEffect, speed);
     } else {
-      // Al terminar el texto, regresamos al estado Idle de forma limpia
+      // --- Al terminar el texto, regresamos al estado Idle ---
       isTyping = false;
       setAvatarState(false);
       if (sendBtn) sendBtn.disabled = false;
