@@ -12,15 +12,18 @@ let currentPad = null;
 let startX, startWidth;
 
 const notes = { "C4": 261.63, "B3": 246.94, "A3": 220.00, "G3": 196.00, "F3": 174.61, "E3": 164.81, "D3": 146.83, "C3": 130.81 };
-const noteNames = Object.keys(notes).slice(0, 7);
-const audioBuffers = [null, null, null, null];
-const filters = [null, null, null, null];
+// SOLUCIÓN BUG 2: Quitamos .slice(0, 7) para incluir las 8 notas que tienes en tu HTML sidebar
+const noteNames = Object.keys(notes); 
+
+// SOLUCIÓN BUG 1: Inicializamos arrays dinámicos vacíos para evitar desbordamientos
+const audioBuffers = [];
+const filters = [];
 const sampleUrls = [
     '../assets/audio/kick.wav',
     '../assets/audio/snare.wav',
     '../assets/audio/hihat.wav',
     '../assets/audio/openhat.wav',
-    '../assets/audio/industrial_synth.wav'
+    '../assets/audio/industrial_synth.wav' // El sample del Synth es el índice 4
 ];
 
 // --- 1. INICIALIZACIÓN DE AUDIO ---
@@ -42,6 +45,7 @@ async function initAudio() {
     }
 
     const loadResults = await Promise.allSettled(sampleUrls.map(async (url, i) => {
+        // Creamos filtros dinámicamente asignados a cada canal
         const filter = audioCtx.createBiquadFilter();
         filter.type = 'lowpass';
         filter.frequency.value = 3000;
@@ -103,7 +107,7 @@ if (sequencerGrid) {
     console.warn("ezdaw: no se encontró #sequencer, la grilla de batería no se generó.");
 }
 
-// --- 3. GENERACIÓN DE PIANO ROLL (Con Resizer Invisible y Reset) ---
+// --- 3. GENERACIÓN DE PIANO ROLL ---
 const pianoSequencer = document.getElementById('piano-sequencer');
 if (pianoSequencer) {
     noteNames.forEach((note, rowIndex) => {
@@ -124,13 +128,13 @@ if (pianoSequencer) {
             pad.onmousedown = (e) => {
                 if (e.target.classList.contains('resizer')) return;
 
-            if (e.button === 2) {
+                if (e.button === 2) {
                     pad.classList.remove('active');
-                    pad.style.width = "100px"; // --- Reset de huella ---
+                    pad.style.width = "100px"; 
                 } else if (e.button === 0) {
                     if (pad.classList.contains('active')) {
                         pad.classList.remove('active');
-                        pad.style.width = "100px"; // --- Reset al desactivar ---
+                        pad.style.width = "100px"; 
                     } else {
                         pad.classList.add('active');
                         if (audioCtx) playNote(note, audioCtx.currentTime);
@@ -192,10 +196,11 @@ function playSound(index, time) {
 }
 
 function playNote(note, time) {
+    // El sample industrial_synth está en la posición 4
     if (!audioCtx || !audioBuffers[4]) return;
     if (!Object.prototype.hasOwnProperty.call(notes, note)) return;
 
-    const decayValue = getNumericValue('piano-decay', 0.2);
+    const decayValue = getNumericValue('piano-decay', 0.5);
     const activePads = document.querySelectorAll(`.piano-pad[data-note="${note}"].active`);
     let noteDuration = 0.15;
 
@@ -216,20 +221,21 @@ function playNote(note, time) {
     source.buffer = audioBuffers[4];
 
     // --- Pitch (Afinación) ---
-    const baseFreq = 130.81;
+    const baseFreq = 130.81; // Frecuencia de C3 como base
     const playbackRate = notes[note] / baseFreq;
     source.playbackRate.setValueAtTime(playbackRate, time);
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(3500, time);
     filter.Q.setValueAtTime(8, time);
 
-    const releaseTime = Number.isFinite(decayValue) && decayValue > 0 ? decayValue : 0.2;
+    const releaseTime = Number.isFinite(decayValue) && decayValue > 0 ? decayValue : 0.5;
     const totalDuration = noteDuration + releaseTime;
 
     gain.gain.setValueAtTime(0, time);
     gain.gain.linearRampToValueAtTime(0.4, time + 0.01);
     gain.gain.setValueAtTime(0.4, time + noteDuration);
     gain.gain.linearRampToValueAtTime(0.0001, time + totalDuration);
+    
     source.connect(filter);
     filter.connect(gain);
     gain.connect(audioCtx.destination);
@@ -242,7 +248,7 @@ function playNote(note, time) {
     }
 }
 
-// --- 6. MOTOR DE TIEMPO (ESTABLE EN SEGUNDO PLANO) ---
+// --- 6. MOTOR DE TIEMPO ---
 function nextNote() {
     const secondsPerBeat = 60.0 / bpm;
     nextStepTime += 0.25 * secondsPerBeat;
@@ -261,17 +267,15 @@ function scheduleStep(step, time) {
     setTimeout(() => {
         if (!isPlaying) return;
 
-        // --- Sincronización exacta con el CSS ---
-        const drumPadWidth = 30;    // --- 30px según el css grid ---
-        const drumGap = 8;          // --- 8px de espacio ---
-        const drumPaddingLeft = 12; // --- 12px de padding interior del grid ---
+        const drumPadWidth = 30;    
+        const drumGap = 8;          
+        const drumPaddingLeft = 12; 
 
-        const pianoStepWidth = 100; // --- Coincide con los piano-pads (width: 100px) ---
+        const pianoStepWidth = 100; 
 
         const drumHead = document.getElementById('drum-playhead');
         const pianoHead = document.getElementById('playhead');
         
-        // --- Fórmulas de alineación absoluta ---
         if (drumHead) {
             drumHead.style.left = (drumPaddingLeft + (step * (drumPadWidth + drumGap))) + "px";
         }
@@ -360,15 +364,16 @@ const bpmSlider = getEl('bpm');
 if (bpmSlider) {
     bpmSlider.oninput = (e) => {
         const parsed = parseFloat(e.target.value);
-        bpm = Number.isFinite(parsed) ? Math.min(300, Math.max(20, parsed)) : bpm;
+        bpm = Number.isFinite(parsed) ? Math.min(180, Math.max(60, parsed)) : bpm;
         const display = document.getElementById('bpm-display');
         if (display) display.textContent = `${bpm} BPM`;
     };
 }
 
-document.querySelectorAll('.drum-pitch-slider[data-row]').forEach(slider => {
+// Control individual para las perillas (Knobs de efectos)
+document.querySelectorAll('.effects-panel .drum-pitch-slider[data-row]').forEach(slider => {
     slider.oninput = (e) => {
-        const row = e.target.dataset.row;
+        const row = parseInt(e.target.dataset.row, 10);
         const value = parseFloat(e.target.value);
         if (filters[row] && Number.isFinite(value)) {
             filters[row].frequency.value = value;

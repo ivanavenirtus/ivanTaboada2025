@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>EZDAW PLAYLIST | Iván Taboada</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/newdaw.css">
+    <link rel="icon" href="../assets/icons/logo.png" type="image/png" sizes="24x24">
+</head>
+
+<body class="subpage">
+    <header></header>
+
+    <main class="wrap section">
+        <h2 class="typewriter main-title">EZDAW - PLAYLIST</h2>
+        <p class="typewriter desc">
+            Arrastra los samples desde el buscador izquierdo hacia las pistas de la playlist.
+            Haz click derecho sobre un bloque para eliminarlo, usa los bordes para recortar y dale Play para escuchar.
+        </p>
+
+        <div class="daw-container">
+            <div class="controls">
+                <button id="play-pause" class="btn typewriter desc">Play</button>
+                <button id="stop-btn" class="btn typewriter desc stop-btn">Stop</button>
+                <div class="control-group">
+                    <span id="bpm-display" class="label-fixed typewriter desc">140 BPM</span>
+                    <input type="range" id="bpm" min="60" max="180" value="140">
+                </div>
+                <div class="control-group snap-group">
+                    <span class="label-fixed typewriter desc">SNAP</span>
+                    <select id="snap-select" class="snap-select">
+                        <option value="1">1/4</option>
+                        <option value="0.5">1/8</option>
+                        <option value="0.25" selected>1/16</option>
+                        <option value="0.125">1/32</option>
+                        <option value="0">Off</option>
+                    </select>
+                </div>
+                <div class="control-group zoom-group">
+                    <span class="label-fixed typewriter desc">ZOOM</span>
+                    <div class="zoom-controls">
+                        <button id="zoom-out" class="zoom-btn">-</button>
+                        <span id="zoom-display" class="zoom-display">100%</span>
+                        <button id="zoom-in" class="zoom-btn">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="playlist-container">
+                <div class="audio-browser">
+                    <h3 class="label-browser typewriter desc">SAMPLES</h3>
+                    <div class="sample-list" id="sample-list">
+                        <div class="sample-item" draggable="true" data-sample-index="0">Kick.wav</div>
+                        <div class="sample-item" draggable="true" data-sample-index="1">Snare.wav</div>
+                        <div class="sample-item" draggable="true" data-sample-index="2">Hihat.wav</div>
+                        <div class="sample-item" draggable="true" data-sample-index="3">Openhat.wav</div>
+                        <div class="sample-item" draggable="true" data-sample-index="4">Synth.wav</div>
+                    </div>
+                    <div class="upload-zone">
+                        <h3 class="label-browser typewriter desc">UPLOAD</h3>
+                        <label for="sample-upload" class="upload-btn btn typewriter desc">+ Add Sample</label>
+                        <input type="file" id="sample-upload" accept="audio/*" multiple hidden>
+                    </div>
+                </div>
+
+                <div class="playlist-wrapper">
+                    <div class="playlist-timeline" id="playlist-timeline">
+                        <div id="playlist-playhead" class="playlist-playhead"></div>
+                        
+                        <div class="playlist-track" data-track="0"></div>
+                        <div class="playlist-track" data-track="1"></div>
+                        <div class="playlist-track" data-track="2"></div>
+                        <div class="playlist-track" data-track="3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/newdaw.js" defer></script>
+    <script src="../js/main.js" defer></script>
+</body>
+
+</html>
