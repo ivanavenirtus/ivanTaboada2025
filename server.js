@@ -25,6 +25,11 @@ app.use(express.json());
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 app.use(express.static(__dirname));
 
+// --- RUTA PRINCIPAL PARA SERVIR EL FRONTEND ---
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
 // --- ENDPOINT PARA EL CHAT ---
 app.post("/api/chat", async (req, res) => {
     try {
@@ -109,9 +114,11 @@ app.post("/api/tts", async (req, res) => {
     }
 });
 
-// --- INICIAR SERVIDOR ---
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
+// --- INICIAR SERVIDOR (SOLO EN DESARROLLO LOCAL) ---
+if (process.env.NODE_ENV !== "production") {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
+}
 
-// Al final de tu server.js
+// Al final de tu server.js para Vercel
 export default app;
