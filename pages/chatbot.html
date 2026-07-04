@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CHATBOT | Iván Taboada</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/chatStyle.css">
+    <!-- Agregamos parámetros de versión para romper la caché del navegador de golpe -->
+    <link rel="stylesheet" href="../css/style.css?v=5">
+    <link rel="stylesheet" href="../css/chatStyle.css?v=5">
     <link rel="icon" href="../assets/icons/logo.png" type="image/png" sizes="24x24">
     <script src="../js/main.js" defer></script>
 </head>
@@ -24,6 +25,15 @@
             </div>
 
             <div class="chat-container">
+                <!-- --- BARRA TERMINAL --- -->
+                <div class="chat-header">
+                    <span class="chat-header-title">// IVANAVENIR_BOT</span>
+                    <span class="chat-header-status">
+                        <span class="status-dot"></span>
+                        ONLINE
+                    </span>
+                </div>
+
                 <!-- --- HISTORIAL DE CONVERSACIÓN --- -->
                 <div id="chat-box" class="chat-box"></div>
 
@@ -36,7 +46,7 @@
         </div>
     </main>
 
-    <!-- --- LÓGICA DEL FRONTEND --- -->
+    <!-- --- LÓGICA DEL FRONTEND RESTRUCTURADA --- -->
     <script>
         const form = document.querySelector("#chat-form");
         const input = document.querySelector("#user-input");
@@ -57,12 +67,25 @@
             avatarVideo.classList.toggle("talking-ui", talking);
         }
 
+        // CORRECCIÓN: Estructura exacta con wrappers y content independientes para el Usuario
         function appendMessage(sender, text) {
             if (!chatBox) return;
-            const messageEl = document.createElement("div");
-            messageEl.className = sender;
-            messageEl.textContent = `${sender === "user" ? "USER:" : "IVÁN:"} ${text}`;
-            chatBox.appendChild(messageEl);
+            
+            const wrapper = document.createElement("div");
+            wrapper.className = `message-wrapper ${sender}`;
+
+            const nameEl = document.createElement("div");
+            nameEl.className = "sender-name";
+            nameEl.textContent = sender === "user" ? "USER" : "IVÁN";
+
+            const contentEl = document.createElement("div");
+            contentEl.className = "message-content";
+            contentEl.textContent = text;
+
+            wrapper.appendChild(nameEl);
+            wrapper.appendChild(contentEl);
+            chatBox.appendChild(wrapper);
+            
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
@@ -95,17 +118,45 @@
             isTyping = true;
             setAvatarState(VIDEO_TALKING, true);
 
+            showTypingIndicator();
+
             const botReply = await postMessage(message);
+            hideTypingIndicator();
             renderBotReply(botReply);
         }
 
+        function showTypingIndicator() {
+            if (!chatBox) return;
+            const indicator = document.createElement("div");
+            indicator.className = "typing-indicator";
+            indicator.id = "typing-indicator";
+            indicator.innerHTML = "<span></span><span></span><span></span>";
+            chatBox.appendChild(indicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById("typing-indicator");
+            if (indicator) indicator.remove();
+        }
+
+        // CORRECCIÓN: Estructura exacta con soporte para efecto Typewriter por caracteres en el bloque content
         function renderBotReply(text) {
             if (!chatBox) return;
 
-            const messageEl = document.createElement("div");
-            messageEl.className = "bot";
-            messageEl.textContent = "IVÁN: ";
-            chatBox.appendChild(messageEl);
+            const wrapper = document.createElement("div");
+            wrapper.className = "message-wrapper bot";
+
+            const nameEl = document.createElement("div");
+            nameEl.className = "sender-name";
+            nameEl.textContent = "IVÁN";
+
+            const contentEl = document.createElement("div");
+            contentEl.className = "message-content";
+
+            wrapper.appendChild(nameEl);
+            wrapper.appendChild(contentEl);
+            chatBox.appendChild(wrapper);
             chatBox.scrollTop = chatBox.scrollHeight;
 
             let index = 0;
@@ -113,7 +164,7 @@
 
             function typeWriter() {
                 if (index < text.length) {
-                    messageEl.textContent += text[index++];
+                    contentEl.textContent += text[index++];
                     chatBox.scrollTop = chatBox.scrollHeight;
                     setTimeout(typeWriter, speed);
                     return;
@@ -122,9 +173,35 @@
                 setAvatarState(VIDEO_IDLE, false);
                 if (sendBtn) sendBtn.disabled = false;
                 if (input) input.focus();
+
+                // --- REPRODUCIR AUDIO CON FISH AUDIO ---
+                playTTS(text);
             }
 
             typeWriter();
+        }
+
+        async function playTTS(text) {
+            try {
+                const res = await fetch("/api/tts", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text }),
+                });
+
+                if (!res.ok) {
+                    console.error("Error TTS:", res.status);
+                    return;
+                }
+
+                const blob = await res.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                const audio = new Audio(audioUrl);
+                audio.onended = () => URL.revokeObjectURL(audioUrl);
+                await audio.play();
+            } catch (error) {
+                console.error("Error al reproducir TTS:", error);
+            }
         }
 
         form?.addEventListener("submit", handleSubmit);
