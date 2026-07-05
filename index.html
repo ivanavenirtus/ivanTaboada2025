@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="./css/style.css">
   <link rel="icon" href="./assets/icons/logo.png" type="image/png" sizes="24x24">
   <link rel="apple-touch-icon" href="./assets/icons/logo.png" sizes="180x180">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
   <script>
     window.addEventListener('load', () => {
@@ -40,12 +43,13 @@
 
     <div class="hero-right">
       <div class="profile-photo">
-        <img src="../assets/media/bodyEskeleton.gif" alt="Ivan Taboada">
+        <div id="model-container" class="model-3d"></div>
       </div>
     </div>
   </main>
 
   <script src="/js/main.js" defer></script>
+  <script src="/js/model3d.js" defer></script>
 </body>
 
 </html>

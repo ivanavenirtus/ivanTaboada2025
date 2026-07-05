@@ -185,11 +185,12 @@ header {
 body:not(.subpage) main.hero {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center; /* Centrado vertical alineando texto y 3D uniformemente */
   gap: 2rem;
   flex: 1;
   min-height: 100vh;
-  padding-top: calc(var(--header-height) + 6rem);
+  padding-top: calc(var(--header-height) + 2rem);
+  padding-bottom: 4rem;
   max-width: var(--max-w);
   margin: 0 auto;
   position: relative;
@@ -204,17 +205,22 @@ body:not(.subpage) main.hero {
 }
 
 .hero-right {
-  flex: 0 0 auto;
+  flex: 1 1 45%;
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   position: relative;
-  margin-top: -15rem;
+  margin-top: 0;
+  min-width: 320px;
 }
 
 .profile-photo {
   width: 100%;
-  max-width: 1000px;
+  height: 700px; /* Alto fijo en desktop para anclar Three.js de manera segura */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .profile-photo img {
@@ -222,6 +228,23 @@ body:not(.subpage) main.hero {
   height: auto;
   object-fit: contain;
   display: block;
+}
+
+.model-3d {
+  width: 100%;
+  height: 100%; /* Forzado para rellenar exactamente las dimensiones de su contenedor superior */
+  background: transparent;
+  border: none;
+  display: block;
+  z-index: 10;
+  position: relative;
+}
+
+.model-3d canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
 }
 
 /* ================================================= */
@@ -552,25 +575,33 @@ pre#output {
     flex-direction: column-reverse;
     text-align: center;
     align-items: center;
-    padding-top: calc(var(--header-height) + 6rem);
+    padding-top: calc(var(--header-height) + 4rem);
   }
 
-  .hero-left,
-  .hero-right {
+  .hero-left {
     flex: 1 1 100%;
   }
 
   .hero-right {
-    transform: scale(1.5) translateX(0);
-    margin-top: 4rem;
+    flex: 1 1 100%;
+    transform: none; /* ELIMINADO el scale(1.5) que corrompía y ocultaba el WebGL canvas */
+    margin-top: 2rem;
     margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    width: 100%;
   }
 
-  .profile-photo img {
-    max-width: 300px;
+  .profile-photo {
+    height: 400px; /* Definición de altura responsiva para tablets */
+    width: 100%;
+    max-width: 400px;
   }
 
-  /* --- Se eliminó la alineación al centro forzada de .kato-link --- */
+  .model-3d {
+    height: 100%;
+    width: 100%;
+  }
 
   .nav-links {
     display: none;
@@ -617,7 +648,7 @@ pre#output {
 
   body.subpage main,
   body:not(.subpage) main.hero {
-    padding: calc(var(--header-height) + 4.5rem) 1rem 1.5rem;
+    padding: calc(var(--header-height) + 4.5rem) 1rem 4rem;
   }
 
   body.sandbox main {
@@ -625,18 +656,20 @@ pre#output {
   }
 
   body:not(.subpage) main.hero {
-    padding-top: calc(var(--header-height) + 5.5rem);
-  }
-
-  .hero-left,
-  .hero-right {
-    flex: 1 1 100%;
+    padding-top: calc(var(--header-height) + 3.5rem);
   }
 
   .hero-right {
     margin-top: 2rem;
     transform: none;
     justify-content: center;
+    width: 100%;
+  }
+
+  .profile-photo {
+    height: 350px; /* Altura controlada para pantallas medianas */
+    width: 100%;
+    max-width: 350px;
   }
 
   .hero-left h1,
@@ -648,12 +681,7 @@ pre#output {
   .hero-left .typewriter.desc {
     font-size: 0.95rem;
     line-height: 1.6;
-    min-height: auto;
-  }
-
-  .profile-photo img {
-    max-width: 100%;
-    height: auto;
+    min-height: 7.5rem;
   }
 
   .nav {
@@ -710,6 +738,13 @@ pre#output {
 
   .hero-left .typewriter.desc {
     font-size: 0.9rem;
+    min-height: 9rem;
+  }
+
+  .profile-photo {
+    height: 280px; /* Altura ideal optimizada para móviles compactos */
+    width: 100%;
+    max-width: 280px;
   }
 
   .btn {
