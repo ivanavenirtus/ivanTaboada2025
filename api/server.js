@@ -43,10 +43,10 @@ app.post("/api/chat", async (req, res) => {
             body: JSON.stringify({
                 model: "llama3-8b-8192", // Modelo rápido y eficiente de Groq
                 messages: [
-                    { role: "system", content: "Eres un asistente útil y amable." },
+                    { role: "system", content: "You are a helpful and friendly assistant. STRICT RULE: always respond in 1-2 short sentences maximum. Never write paragraphs, lists, or long explanations. Be direct and concise." },
                     { role: "user", content: userMessage },
                 ],
-                max_tokens: 200,
+                max_tokens: 60,
             }),
         });
 

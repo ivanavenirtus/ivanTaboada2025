@@ -41,7 +41,7 @@ function snapPixel(px) {
 async function initAudio() {
     if (audioCtx) return;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return alert("Web Audio API no soportada.");
+    if (!AudioContextClass) return alert("Web Audio API not supported.");
     
     try {
         audioCtx = new AudioContextClass();
@@ -83,8 +83,8 @@ async function loadSampleFromFile(file) {
         sampleNames[index] = file.name;
         addSampleToBrowser(index, file.name, true);
     } catch (e) {
-        console.error("Error decodificando audio:", e);
-        alert("No se pudo cargar el archivo de audio: " + file.name);
+        console.error("Error decoding audio:", e);
+        alert("Could not load audio file: " + file.name);
     }
 }
 

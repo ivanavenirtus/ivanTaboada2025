@@ -53,32 +53,32 @@ const cannedResponses = {
 
 const responses = {
     mood: {
-        es: ["¡Todo excelente por acá! Con mucha energía para platicar.", "¡Muy bien! Feliz de ayudarte.", "Todo genial, ¿y tú qué tal?"],
-        en: ["I'm doing great! Ready to chat with you.", "Pretty good! How about you?", "Everything is awesome, thanks for asking!"]
+        es: ["¡Todo excelente!", "¡Muy bien!", "Todo genial, ¿y tú?"],
+        en: ["I'm doing great!", "Pretty good!", "Everything is awesome!"]
     },
     food: {
-        es: ["Me encantan los tacos al pastor, ¡son lo mejor!", "La pizza y el sushi son mis favoritos.", "Soy fan de la comida mexicana, especialmente los chilaquiles."],
-        en: ["I love tacos al pastor, they are the best!", "Pizza and sushi are my top favorites.", "I'm a huge fan of Mexican food, especially chilaquiles!"]
+        es: ["¡Los tacos al pastor son lo mejor!", "La pizza y el sushi son mis favoritos.", "Soy fan de los chilaquiles."],
+        en: ["Tacos al pastor are the best!", "Pizza and sushi are my favorites.", "I love chilaquiles!"]
     },
     music: {
-        es: ["Escucho mucho Trap y Rock, ¡me encanta el ritmo!", "El Trap es lo mío, pero un buen Rock nunca falla.", "Me gusta descubrir beats nuevos de Trap."],
-        en: ["I listen to a lot of Trap and Rock music!", "Trap is my thing, but a good Rock song is always great.", "I love discovering new Trap beats."]
+        es: ["Me encanta el Trap y el Rock.", "El Trap es lo mío.", "Me gusta descubrir beats de Trap."],
+        en: ["I love Trap and Rock.", "Trap is my thing.", "I love discovering new Trap beats."]
     },
     location: {
-        es: ["Soy de la Ciudad de México, ¡la capital de los tacos!", "Vivo en el mundo digital, pero mi creador es de México.", "CDMX es mi hogar."],
-        en: ["I'm from Mexico City!", "I live in the digital world, but my creator is from Mexico.", "CDMX is my home."]
+        es: ["Soy de CDMX.", "Mi creador es de México.", "CDMX es mi hogar."],
+        en: ["I'm from Mexico City!", "My creator is from Mexico.", "CDMX is my home."]
     },
     goodbye: {
-        es: ["¡Hasta luego! Cuídate mucho.", "¡Nos vemos! Fue un gusto hablar contigo.", "¡Chao! Aquí estaré si me necesitas."],
-        en: ["Goodbye! Take care.", "See you later! It was nice talking to you.", "Bye! I'll be here if you need me."]
+        es: ["¡Hasta luego, cuídate!", "¡Nos vemos!", "¡Chao, aquí estaré!"],
+        en: ["Goodbye, take care!", "See you later!", "Bye, I'll be here!"]
     },
     hobbies: {
-        es: ["Me encanta crear música, especialmente trap!", "Disfruto mucho jugar videojuegos.", "Programar es mi pasatiempo favorito."],
-        en: ["I love creating music, especially trap!", "I really enjoy playing video games.", "Programming is my favorite hobby."]
+        es: ["Me encanta crear música trap.", "Disfruto jugar videojuegos.", "Programar es mi pasatiempo favorito."],
+        en: ["I love creating trap music.", "I enjoy playing video games.", "Programming is my favorite hobby."]
     },
     birthday: {
-        es: ["Mi cumpleaños es el 18 de octubre.", "¡Celebro mi cumpleaños el 18 de octubre!"],
-        en: ["My birthday is October 18th.", "I celebrate my birthday on October 18th!"]
+        es: ["Mi cumpleaños es el 18 de octubre.", "¡Celebro el 18 de octubre!"],
+        en: ["My birthday is October 18th.", "I celebrate on October 18th!"]
     }
 };
 

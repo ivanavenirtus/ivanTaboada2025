@@ -85,13 +85,13 @@ export default async function handler(req, res) {
                        `Temperatura: ${weatherInfo.temp}°C\n` +
                        `Condición: ${weatherInfo.description}\n` +
                        `Humedad: ${weatherInfo.humidity}%\n\n` +
-                       "Redacta una respuesta breve, natural y conversacional en español usando estos datos."
+                        "Responde en UNA sola frase breve, natural y conversacional en español usando estos datos. Sin listas ni explicaciones largas."
             },
             { role: "user", content: userMessage }
           ],
           model: "llama-3.3-70b-versatile",
           temperature: 0.6, 
-          max_tokens: 150, 
+          max_tokens: 60, 
         });
 
         const aiResponse = chatCompletion.choices[0]?.message?.content;
@@ -104,13 +104,13 @@ export default async function handler(req, res) {
       messages: [
         { 
           role: "system", 
-          content: "Eres un asistente inteligente, amable y conciso. Responde en 1 o 2 párrafos cortos." 
+          content: "Eres un asistente inteligente y amable. REGLA OBLIGATORIA: responde SIEMPRE en 1-2 frases cortas máximo. Nunca escribas párrafos, listas ni explicaciones largas. Sé directo y conciso." 
         },
         { role: "user", content: userMessage }
       ],
       model: "llama-3.3-70b-versatile",
       temperature: 0.6, 
-      max_tokens: 350, 
+      max_tokens: 60, 
     });
 
     const aiResponse = chatCompletion.choices[0]?.message?.content;
