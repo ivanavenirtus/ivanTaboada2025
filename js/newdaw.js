@@ -1,12 +1,15 @@
 let audioCtx = null;
+let masterGain = null;
 let isPlaying = false;
+let isPaused = false;
 let bpm = 140;
 let nextStepTime = 0.0;
-const scheduleAheadTime = 0.1;
+const scheduleAheadTime = 0.12;
 let timerID = null;
+let masterVolume = 0.8;
 
 // --- CONFIGURACIÓN DE PLAYLIST ---
-let playlistEvents = []; 
+let playlistEvents = [];
 let PIXELS_PER_BEAT = 100;
 let zoomLevel = 1.0;
 let currentPlayheadBeat = 0.0;
@@ -17,8 +20,9 @@ let snapBeats = 0.25;
 // --- SAMPLES DINÁMICOS ---
 const audioBuffers = [];
 const filters = [];
+const gains = [];
 const sampleNames = [];
-const activeSources = []; // Track de sources activos para poder detenerlos
+const activeSources = [];
 const sampleUrls = [
     '../assets/audio/kick.wav',
     '../assets/audio/snare.wav',
@@ -41,50 +45,92 @@ function snapPixel(px) {
 async function initAudio() {
     if (audioCtx) return;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return alert("Web Audio API not supported.");
-    
+    if (!AudioContextClass) {
+        console.error("Web Audio API not supported.");
+        alert("Web Audio API not supported.");
+        return;
+    }
+
     try {
         audioCtx = new AudioContextClass();
-    } catch (e) { return console.error(e); }
+    } catch (e) {
+        console.error("Error creating AudioContext:", e);
+        return;
+    }
 
-    await Promise.allSettled(sampleUrls.map(async (url, i) => {
-        await loadSampleFromUrl(url, i);
-    }));
+    // --- Master gain node para control de volumen global ---
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = masterVolume;
+    masterGain.connect(audioCtx.destination);
+
+    // --- Cargar samples con manejo de errores individual ---
+    const results = await Promise.allSettled(
+        sampleUrls.map(async (url, i) => {
+            await loadSampleFromUrl(url, i);
+        })
+    );
+
+    // Reportar samples que fallaron
+    results.forEach((result, i) => {
+        if (result.status === 'rejected') {
+            console.warn(`Sample ${sampleUrls[i]} no pudo cargarse:`, result.reason);
+        }
+    });
 }
 
 async function loadSampleFromUrl(url, index) {
     if (!audioCtx) return;
-    if (!filters[index]) {
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.value = 3500;
-        filter.connect(audioCtx.destination);
-        filters[index] = filter;
+    try {
+        if (!filters[index]) {
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 3500;
+            filter.connect(masterGain || audioCtx.destination);
+            filters[index] = filter;
+
+            // Gain individual por sample
+            const gain = audioCtx.createGain();
+            gain.gain.value = 1.0;
+            gain.connect(filter);
+            gains[index] = gain;
+        }
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status} for ${url}`);
+        const arrayBuffer = await response.arrayBuffer();
+        audioBuffers[index] = await audioCtx.decodeAudioData(arrayBuffer);
+        sampleNames[index] = url.split('/').pop();
+    } catch (e) {
+        console.error(`Error loading sample ${url}:`, e);
+        throw e;
     }
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-    const arrayBuffer = await response.arrayBuffer();
-    audioBuffers[index] = await audioCtx.decodeAudioData(arrayBuffer);
-    sampleNames[index] = url.split('/').pop();
 }
 
 async function loadSampleFromFile(file) {
     if (!audioCtx) await initAudio();
     if (!audioCtx) return;
     const index = audioBuffers.length;
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 3500;
-    filter.connect(audioCtx.destination);
-    filters[index] = filter;
     try {
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 3500;
+        filter.connect(masterGain || audioCtx.destination);
+        filters[index] = filter;
+
+        const gain = audioCtx.createGain();
+        gain.gain.value = 1.0;
+        gain.connect(filter);
+        gains[index] = gain;
+
         const arrayBuffer = await file.arrayBuffer();
         audioBuffers[index] = await audioCtx.decodeAudioData(arrayBuffer);
         sampleNames[index] = file.name;
         addSampleToBrowser(index, file.name, true);
     } catch (e) {
-        console.error("Error decoding audio:", e);
+        console.error("Error decoding audio file:", file.name, e);
         alert("Could not load audio file: " + file.name);
+        // Limpiar filter/gain si falló
+        if (filters[index]) { try { filters[index].disconnect(); } catch(_) {} delete filters[index]; }
+        if (gains[index]) { try { gains[index].disconnect(); } catch(_) {} delete gains[index]; }
     }
 }
 
@@ -533,27 +579,52 @@ function drawWaveform(canvas, buffer, blockWidthPx, offsetSec, playbackRate) {
 
 // --- 3. MOTOR DE AUDIO ---
 function playSound(index, time, offset, duration, playbackRate) {
-    if (!audioCtx || !audioBuffers[index] || !filters[index]) return;
-    const source = audioCtx.createBufferSource();
-    source.buffer = audioBuffers[index];
-    source.connect(filters[index]);
-    const rate = playbackRate && playbackRate > 0 ? playbackRate : 1.0;
-    if (rate !== 1.0) {
-        source.playbackRate.value = rate;
+    if (!audioCtx || !audioBuffers[index] || !gains[index]) return;
+    try {
+        const source = audioCtx.createBufferSource();
+        source.buffer = audioBuffers[index];
+
+        // --- Envelope gain anti-click ---
+        const envGain = audioCtx.createGain();
+        envGain.connect(gains[index]);
+
+        const rate = playbackRate && playbackRate > 0 ? playbackRate : 1.0;
+        if (rate !== 1.0) {
+            source.playbackRate.value = rate;
+        }
+
+        // Convertir offset y duration de tiempo de salida a tiempo del buffer
+        const bufferOffset = Math.max(0, (offset || 0) * rate);
+        const bufferDuration = duration ? duration * rate : undefined;
+
+        // --- Fade in/out para evitar clicks (5ms) ---
+        const fadeTime = 0.005;
+        const playDuration = bufferDuration || (source.buffer.duration - bufferOffset);
+        const endTime = time + playDuration;
+
+        envGain.gain.setValueAtTime(0, time);
+        envGain.gain.linearRampToValueAtTime(1, time + fadeTime);
+        envGain.gain.setValueAtTime(1, endTime - fadeTime);
+        envGain.gain.linearRampToValueAtTime(0, endTime);
+
+        source.connect(envGain);
+
+        if (bufferDuration && bufferDuration > 0) {
+            source.start(time, bufferOffset, bufferDuration);
+        } else {
+            source.start(time, bufferOffset);
+        }
+
+        activeSources.push(source);
+        source.onended = () => {
+            const i = activeSources.indexOf(source);
+            if (i > -1) activeSources.splice(i, 1);
+            try { source.disconnect(); } catch (e) {}
+            try { envGain.disconnect(); } catch (e) {}
+        };
+    } catch (e) {
+        console.error("Error en playSound:", e);
     }
-    // Convertir offset y duration de tiempo de salida a tiempo del buffer
-    const bufferOffset = (offset || 0) * rate;
-    const bufferDuration = duration ? duration * rate : undefined;
-    if (bufferDuration && bufferDuration > 0) {
-        source.start(time, bufferOffset, bufferDuration);
-    } else {
-        source.start(time, bufferOffset);
-    }
-    activeSources.push(source);
-    source.onended = () => {
-        const i = activeSources.indexOf(source);
-        if (i > -1) activeSources.splice(i, 1);
-    };
 }
 
 // Auto-snap: encuentra el snap más cercano de [1, 0.5, 0.25, 0.125] para una posición en beats
@@ -579,6 +650,15 @@ function stopAllSources() {
     });
     activeSources.length = 0;
 }
+
+// --- Limpieza al cerrar la página ---
+window.addEventListener('beforeunload', () => {
+    if (timerID) clearInterval(timerID);
+    stopAllSources();
+    if (audioCtx && audioCtx.state !== 'closed') {
+        try { audioCtx.close(); } catch (e) {}
+    }
+});
 
 // Duración total del proyecto en beats (2400px / 100px por beat = 24 beats)
 const MAX_BEATS = 24;
