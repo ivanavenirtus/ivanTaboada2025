@@ -12,6 +12,7 @@ const goodbyeKeywords = ["adios", "chao", "hasta luego", "bye", "goodbye", "see 
 const hobbiesKeywords = ["que te gusta hacer", "cuales son tus hobbies", "what do you like to do", "what are your hobbies"];
 const siblingsKeywords = ["si tienes hermanos", "tienes hermanos", "tienes hermana", "tienes hermanos o hermanas", "hermanos", "tienes familia", "do you have siblings", "do you have a brother", "do you have a sister", "siblings", "brother", "sister", "do you have any siblings"];
 const nameKeywords = ["como te llamas", "tu nombre", "what is your name", "your name"];
+const momKeywords = ["tu mama", "tu mamá", "como se llama tu mama", "como se llama tu mamá", "nombre de tu mama", "nombre de tu mamá", "quien es tu mama", "quien es tu mamá", "your mom", "your mother", "what is your mom's name", "what is your mother's name", "who is your mom", "who is your mother", "mom's name", "mother's name", "your mom's name", "your mother's name"];
 
 const keywordGroups = {
     name: nameKeywords,
@@ -25,7 +26,8 @@ const keywordGroups = {
     music: musicKeywords,
     location: locationKeywords,
     goodbye: goodbyeKeywords,
-    hobbies: hobbiesKeywords
+    hobbies: hobbiesKeywords,
+    mom: momKeywords
 };
 
 const cannedResponses = {
@@ -48,6 +50,10 @@ const cannedResponses = {
     creator: {
         es: "Fui creado por Iván.",
         en: "I was created by Iván."
+    },
+    mom: {
+        es: "Mi mamá se llama Tuly, igual que mi abuelita.",
+        en: "My mom is named Tuly, just like my grandmother."
     }
 };
 
@@ -93,7 +99,7 @@ function normalizeMessage(message) {
 function detectLanguage(message) {
     const normalized = normalizeMessage(message);
     // --- Patrones en inglés para detección de idioma ---
-    const englishPatterns = ["what", "how", "who", "your", "time", "weather", "age", "old", "bye", "live", "eat", "hobbies", "pets", "birthday"];
+    const englishPatterns = ["what", "how", "who", "your", "time", "weather", "age", "old", "bye", "live", "eat", "hobbies", "pets", "birthday", "mom", "mother"];
     return englishPatterns.some(word => normalized.includes(word)) ? "en" : "es";
 }
 
@@ -119,6 +125,7 @@ export async function getLocalResponse(userMessage) {
     const isLocation = locationKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
     const isGoodbye = goodbyeKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
     const isHobby = hobbiesKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
+    const isMom = momKeywords.some(k => normalizedMessage.includes(normalizeMessage(k)));
 
     let respuesta = null;
     if (isName) {
@@ -137,6 +144,8 @@ export async function getLocalResponse(userMessage) {
             : "Tengo una hermana que se llama Sofía.";
     } else if (isCreator) {
         respuesta = lang === "en" ? "I was created by Iván." : "Fui creado por Iván.";
+    } else if (isMom) {
+        respuesta = lang === "en" ? "My mom is named Tuly, just like my grandmother." : "Mi mamá se llama Tuly, igual que mi abuelita.";
     } else if (isMood) {
         respuesta = getRandom(responses.mood[lang]);
     } else if (isFood) {
